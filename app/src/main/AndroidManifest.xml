@@ -9,11 +9,11 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.HabitTrack">
+        android:theme="@style/Theme.Mementide">
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.HabitTrack">
+            android:theme="@style/Theme.Mementide">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

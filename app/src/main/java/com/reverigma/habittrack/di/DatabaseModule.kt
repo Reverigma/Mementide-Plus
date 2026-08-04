@@ -17,8 +17,16 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, "habittrack.db").build()
+        Room.databaseBuilder(context, AppDatabase::class.java, "mementide.db")
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     fun provideHabitDao(db: AppDatabase) = db.habitDao()
+
+    @Provides
+    fun provideHabitRecordDao(db: AppDatabase) = db.habitRecordDao()
+
+    @Provides
+    fun provideAnniversaryDao(db: AppDatabase) = db.anniversaryDao()
 }

@@ -4,11 +4,32 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Cake
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.reverigma.habittrack.ui.anniversary.AddAnniversaryDialog
+import com.reverigma.habittrack.ui.anniversary.AnniversaryScreen
+import com.reverigma.habittrack.ui.anniversary.AnniversaryViewModel
+import com.reverigma.habittrack.ui.home.AddHabitDialog
 import com.reverigma.habittrack.ui.home.HomeScreen
-import com.reverigma.habittrack.ui.theme.HabitTrackTheme
+import com.reverigma.habittrack.ui.home.HomeViewModel
+import com.reverigma.habittrack.ui.theme.MementideTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -16,12 +37,65 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            HabitTrackTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    HomeScreen()
+            MementideTheme {
+                var selected by remember { mutableStateOf(0) }
+                val homeVm: HomeViewModel = hiltViewModel()
+                val anniVm: AnniversaryViewModel = hiltViewModel()
+                var showAddHabit by remember { mutableStateOf(false) }
+                var showAddAnni by remember { mutableStateOf(false) }
+
+                Scaffold(
+                    bottomBar = {
+                        NavigationBar {
+                            NavigationBarItem(
+                                selected = selected == 0,
+                                onClick = { selected = 0 },
+                                icon = { Icon(Icons.Filled.CheckCircle, "今日") },
+                                label = { Text("今日") }
+                            )
+                            NavigationBarItem(
+                                selected = selected == 1,
+                                onClick = { selected = 1 },
+                                icon = { Icon(Icons.Filled.Cake, "纪念日") },
+                                label = { Text("纪念日") }
+                            )
+                        }
+                    },
+                    floatingActionButton = {
+                        FloatingActionButton(
+                            onClick = { if (selected == 0) showAddHabit = true else showAddAnni = true }
+                        ) {
+                            Icon(Icons.Filled.Add, "添加")
+                        }
+                    }
+                ) { padding ->
+                    when (selected) {
+                        0 -> {
+                            HomeScreen(homeVm, Modifier.fillMaxSize().padding(padding))
+                        }
+                        1 -> {
+                            AnniversaryScreen(anniVm, Modifier.fillMaxSize().padding(padding))
+                        }
+                    }
+                }
+
+                if (showAddHabit) {
+                    AddHabitDialog(
+                        onDismiss = { showAddHabit = false },
+                        onConfirm = { n, e, c, t ->
+                            homeVm.addHabit(n, e, c, t)
+                            showAddHabit = false
+                        }
+                    )
+                }
+                if (showAddAnni) {
+                    AddAnniversaryDialog(
+                        onDismiss = { showAddAnni = false },
+                        onConfirm = { n, e, d, r, nt ->
+                            anniVm.add(n, e, d, r, nt)
+                            showAddAnni = false
+                        }
+                    )
                 }
             }
         }

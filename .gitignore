@@ -35,3 +35,7 @@ captures/
 # Keystore (绝不入库)
 *.jks
 *.keystore
+
+# Local Gradle distribution (downloaded for offline build)
+_g87/
+_g87.zip

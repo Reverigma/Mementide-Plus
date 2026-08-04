@@ -1,4 +1,4 @@
 <resources>
     <!-- Compose 自行用 MaterialTheme，这里只提供一个无 ActionBar 的载体主题 -->
-    <style name="Theme.HabitTrack" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Mementide" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
