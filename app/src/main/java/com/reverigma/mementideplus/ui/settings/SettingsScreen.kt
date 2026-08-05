@@ -70,6 +70,9 @@ fun SettingsScreen(
     val reminderEnabled by viewModel.reminderEnabled.collectAsState()
     val reminderTime by viewModel.reminderTime.collectAsState()
     val advancedMode by viewModel.advancedMode.collectAsState()
+    val statsMonthCalendar by viewModel.statsMonthCalendar.collectAsState()
+    val statsHeatmap by viewModel.statsHeatmap.collectAsState()
+    val statsViewOrder by viewModel.statsViewOrder.collectAsState()
     var showSetPin by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf<String?>(null) }
@@ -282,6 +285,101 @@ fun SettingsScreen(
                         Switch(
                             checked = advancedMode,
                             onCheckedChange = { viewModel.setAdvancedMode(it) }
+                        )
+                    }
+                }
+            }
+
+            // 统计页视图
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text("统计页视图", style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "选择统计页展示哪些视图，并调整显示顺序（默认只显示月度日历）。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(14.dp))
+
+                    // 顺序控制
+                    val orderList = statsViewOrder.split(",")
+                    val orderLabel = orderList.joinToString(" → ") {
+                        when (it) {
+                            "month" -> "月度日历"
+                            "heatmap" -> "热力图"
+                            else -> it
+                        }
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "当前顺序：$orderLabel",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                "统计页按此顺序从上到下显示",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        TextButton(
+                            enabled = orderList.size > 1,
+                            onClick = {
+                                viewModel.setStatsViewOrder(orderList.reversed().joinToString(","))
+                            }
+                        ) { Text("交换顺序") }
+                    }
+                    Spacer(Modifier.height(6.dp))
+
+                    // 月度日历
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("月度日历", style = MaterialTheme.typography.bodyLarge)
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                "按天显示打卡密度，可翻月、标记今天",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = statsMonthCalendar,
+                            onCheckedChange = {
+                                viewModel.setStatsMonthCalendar(it)
+                                if (it && !statsHeatmap && statsViewOrder.contains("heatmap")) {
+                                    viewModel.setStatsViewOrder("month,heatmap")
+                                }
+                            }
+                        )
+                    }
+                    Spacer(Modifier.height(6.dp))
+
+                    // 近 18 周热力图
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("近 18 周打卡热力图", style = MaterialTheme.typography.bodyLarge)
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                "一屏看 18 周连续趋势（绿阶）",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = statsHeatmap,
+                            onCheckedChange = {
+                                viewModel.setStatsHeatmap(it)
+                                if (it && !statsMonthCalendar && statsViewOrder.contains("month")) {
+                                    viewModel.setStatsViewOrder("heatmap,month")
+                                }
+                            }
                         )
                     }
                 }

@@ -42,9 +42,36 @@ class AppSettings @Inject constructor(
     private val _advancedMode = MutableStateFlow(prefs.getBoolean(KEY_ADVANCED, false))
     val advancedMode: StateFlow<Boolean> = _advancedMode.asStateFlow()
 
+    /** 统计页：是否显示月度日历（默认开） */
+    private val _statsMonthCalendar = MutableStateFlow(prefs.getBoolean(KEY_STATS_MONTH, true))
+    val statsMonthCalendar: StateFlow<Boolean> = _statsMonthCalendar.asStateFlow()
+
+    /** 统计页：是否显示近 18 周打卡密度热力图（默认关，与月历去重） */
+    private val _statsHeatmap = MutableStateFlow(prefs.getBoolean(KEY_STATS_HEATMAP, false))
+    val statsHeatmap: StateFlow<Boolean> = _statsHeatmap.asStateFlow()
+
+    /** 统计页视图顺序："month,heatmap" 或 "heatmap,month"，默认月历在前 */
+    private val _statsViewOrder = MutableStateFlow(prefs.getString(KEY_STATS_ORDER, "month,heatmap") ?: "month,heatmap")
+    val statsViewOrder: StateFlow<String> = _statsViewOrder.asStateFlow()
+
     fun setAdvancedMode(enabled: Boolean) {
         prefs.edit { putBoolean(KEY_ADVANCED, enabled) }
         _advancedMode.value = enabled
+    }
+
+    fun setStatsMonthCalendar(enabled: Boolean) {
+        prefs.edit { putBoolean(KEY_STATS_MONTH, enabled) }
+        _statsMonthCalendar.value = enabled
+    }
+
+    fun setStatsHeatmap(enabled: Boolean) {
+        prefs.edit { putBoolean(KEY_STATS_HEATMAP, enabled) }
+        _statsHeatmap.value = enabled
+    }
+
+    fun setStatsViewOrder(order: String) {
+        prefs.edit { putString(KEY_STATS_ORDER, order) }
+        _statsViewOrder.value = order
     }
 
     fun setReminderEnabled(enabled: Boolean) {
@@ -105,5 +132,8 @@ class AppSettings @Inject constructor(
         private const val KEY_REMINDER_ENABLED = "reminder_enabled"
         private const val KEY_REMINDER_TIME = "reminder_time"
         private const val KEY_ADVANCED = "advanced_mode"
+        private const val KEY_STATS_MONTH = "stats_month_calendar"
+        private const val KEY_STATS_HEATMAP = "stats_heatmap"
+        private const val KEY_STATS_ORDER = "stats_view_order"
     }
 }

@@ -53,6 +53,14 @@ import com.reverigma.mementideplus.util.DateUtils
 @Composable
 fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
     val state by viewModel.uiState.collectAsState()
+    val showMonth by viewModel.statsMonthCalendar.collectAsState()
+    val showHeat by viewModel.statsHeatmap.collectAsState()
+    val viewOrder by viewModel.statsViewOrder.collectAsState()
+    // 按设置顺序排列视图
+    val views = buildList {
+        if (showMonth) add("month")
+        if (showHeat) add("heatmap")
+    }.sortedWith(compareBy { viewOrder.split(",").indexOf(it).let { i -> if (i < 0) Int.MAX_VALUE else i } })
     Column(modifier = modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text("统计") },
@@ -90,66 +98,70 @@ fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
                 }
             }
 
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
+            // 统计视图按设置顺序渲染（月度日历 / 热力图）
+            views.forEach { v ->
+                when (v) {
+                    "month" -> item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                         ) {
-                            Text(
-                                "月度日历",
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.weight(1f)
-                            )
-                            IconButton(onClick = { viewModel.prevMonth() }) {
-                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "上月")
-                            }
-                            Text(
-                                state.monthLabel,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            IconButton(onClick = { viewModel.nextMonth() }) {
-                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "下月")
-                            }
-                            IconButton(onClick = { viewModel.resetMonth() }) {
-                                Icon(Icons.Filled.Today, "回到本月")
+                            Column(modifier = Modifier.padding(20.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        "月度日历",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    IconButton(onClick = { viewModel.prevMonth() }) {
+                                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "上月")
+                                    }
+                                    Text(
+                                        state.monthLabel,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    IconButton(onClick = { viewModel.nextMonth() }) {
+                                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "下月")
+                                    }
+                                    IconButton(onClick = { viewModel.resetMonth() }) {
+                                        Icon(Icons.Filled.Today, "回到本月")
+                                    }
+                                }
+                                Spacer(Modifier.height(12.dp))
+                                MonthCalendar(
+                                    cells = state.monthCells,
+                                    activeHabits = state.activeHabits
+                                )
                             }
                         }
-                        Spacer(Modifier.height(12.dp))
-                        MonthCalendar(
-                            cells = state.monthCells,
-                            activeHabits = state.activeHabits
-                        )
                     }
-                }
-            }
-
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            "近 18 周打卡密度",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(Modifier.height(14.dp))
-                        if (state.activeHabits == 0) {
-                            EmptyStats()
-                        } else {
-                            Heatmap(state = state)
-                            Spacer(Modifier.height(12.dp))
-                            HeatmapLegend()
+                    "heatmap" -> item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(20.dp)) {
+                                Text(
+                                    "近 18 周打卡密度",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Spacer(Modifier.height(14.dp))
+                                if (state.activeHabits == 0) {
+                                    EmptyStats()
+                                } else {
+                                    Heatmap(state = state)
+                                    Spacer(Modifier.height(12.dp))
+                                    HeatmapLegend()
+                                }
+                            }
                         }
                     }
                 }

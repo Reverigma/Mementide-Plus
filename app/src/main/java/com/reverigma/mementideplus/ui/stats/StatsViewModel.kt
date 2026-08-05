@@ -31,11 +31,21 @@ data class StatsUiState(
 @HiltViewModel
 class StatsViewModel @Inject constructor(
     private val habitRepo: HabitRepository,
-    private val recordDao: HabitRecordDao
+    private val recordDao: HabitRecordDao,
+    private val appSettings: com.reverigma.mementideplus.data.settings.AppSettings
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StatsUiState())
     val uiState: StateFlow<StatsUiState> = _uiState
+
+    /** 统计页视图配置：月度日历显示开关 */
+    val statsMonthCalendar: StateFlow<Boolean> = appSettings.statsMonthCalendar
+
+    /** 统计页视图配置：热力图显示开关 */
+    val statsHeatmap: StateFlow<Boolean> = appSettings.statsHeatmap
+
+    /** 统计页视图配置：显示顺序 "month,heatmap" 或 "heatmap,month" */
+    val statsViewOrder: StateFlow<String> = appSettings.statsViewOrder
 
     /** 月历偏移：0=当月，-1=上月，1=下月 */
     private val _monthOffset = MutableStateFlow(0)

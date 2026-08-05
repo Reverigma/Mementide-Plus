@@ -36,6 +36,15 @@ class SettingsViewModel @Inject constructor(
     /** 高级模式：卡片上显示补录/编辑/删除等进阶操作。 */
     val advancedMode: StateFlow<Boolean> = appSettings.advancedMode
 
+    /** 统计页：月度日历显示开关。 */
+    val statsMonthCalendar: StateFlow<Boolean> = appSettings.statsMonthCalendar
+
+    /** 统计页：近 18 周热力图显示开关。 */
+    val statsHeatmap: StateFlow<Boolean> = appSettings.statsHeatmap
+
+    /** 统计页视图顺序："month,heatmap" 或 "heatmap,month"。 */
+    val statsViewOrder: StateFlow<String> = appSettings.statsViewOrder
+
     /** 本次运行中的「是否处于加锁态」——由后台返回逻辑控制。 */
     private val _isLocked = MutableStateFlow(false)
 
@@ -58,6 +67,9 @@ class SettingsViewModel @Inject constructor(
     fun setReminderEnabled(enabled: Boolean) = appSettings.setReminderEnabled(enabled)
     fun setReminderTime(time: String) = appSettings.setReminderTime(time)
     fun setAdvancedMode(enabled: Boolean) = appSettings.setAdvancedMode(enabled)
+    fun setStatsMonthCalendar(enabled: Boolean) = appSettings.setStatsMonthCalendar(enabled)
+    fun setStatsHeatmap(enabled: Boolean) = appSettings.setStatsHeatmap(enabled)
+    fun setStatsViewOrder(order: String) = appSettings.setStatsViewOrder(order)
 
     /** 导出全部数据为 JSON 字符串。 */
     suspend fun exportData(): String = backupRepo.exportJson()
