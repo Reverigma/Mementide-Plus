@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Anniversary
@@ -137,6 +138,7 @@ private fun EmptyAnniversaries(onAdd: () -> Unit) {
 @Composable
 private fun AnniversaryCard(item: AnniversaryItem, onDelete: () -> Unit) {
     val a = item.anniversary
+    val tint = Color(a.colorInt)
     val label = when {
         item.countdownDays > 0 -> "还有 ${item.countdownDays} 天"
         item.countdownDays == 0L -> "就是今天"
@@ -157,7 +159,15 @@ private fun AnniversaryCard(item: AnniversaryItem, onDelete: () -> Unit) {
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(a.emoji, fontSize = 28.sp)
+            Surface(
+                shape = CircleShape,
+                color = tint.copy(alpha = 0.20f),
+                modifier = Modifier.size(44.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(a.emoji, fontSize = 22.sp)
+                }
+            }
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(

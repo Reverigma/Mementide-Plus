@@ -2,6 +2,8 @@ package com.reverigma.mementideplus.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.reverigma.mementideplus.data.db.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -14,10 +16,20 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
+    /** v2 -> v3: anniversaries 表新增 colorInt 列（默认玫瑰红 0xFFE11D48） */
+    private val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE anniversaries ADD COLUMN colorInt INTEGER NOT NULL DEFAULT -2024120"
+            )
+        }
+    }
+
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "mementide.db")
+            .addMigrations(MIGRATION_2_3)
             .fallbackToDestructiveMigration()
             .build()
 

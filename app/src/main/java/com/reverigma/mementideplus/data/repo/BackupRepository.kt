@@ -64,6 +64,7 @@ class BackupRepository @Inject constructor(
                 put("id", a.id)
                 put("name", a.name)
                 put("emoji", a.emoji)
+                put("colorInt", a.colorInt)
                 put("date", a.date)
                 put("repeatType", a.repeatType)
                 put("note", a.note)
@@ -117,6 +118,7 @@ class BackupRepository @Inject constructor(
                     id = o.getString("id"),
                     name = o.getString("name"),
                     emoji = o.optString("emoji", "🎉"),
+                    colorInt = o.optInt("colorInt", 0xFFE11D48.toInt()),
                     date = o.getString("date"),
                     repeatType = o.optString("repeatType", REPEAT_YEARLY),
                     note = o.optString("note", ""),

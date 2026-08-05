@@ -1,5 +1,6 @@
 package com.reverigma.mementideplus.ui.anniversary
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,13 +8,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -24,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.reverigma.mementideplus.data.model.REPEAT_MONTHLY
 import com.reverigma.mementideplus.data.model.REPEAT_NONE
@@ -34,14 +45,21 @@ import com.reverigma.mementideplus.util.DateUtils
 @Composable
 fun AddAnniversaryDialog(
     onDismiss: () -> Unit,
-    onConfirm: (name: String, emoji: String, date: String, repeat: String, note: String) -> Unit
+    onConfirm: (name: String, emoji: String, colorInt: Int, date: String, repeat: String, note: String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var emoji by remember { mutableStateOf("🎉") }
+    var color by remember { mutableStateOf(0xFFE11D48.toInt()) }
     var date by remember { mutableStateOf(DateUtils.todayStr()) }
     var repeat by remember { mutableStateOf(REPEAT_YEARLY) }
     var note by remember { mutableStateOf("") }
     var showPicker by remember { mutableStateOf(false) }
+
+    val emojis = listOf("🎉", "🎂", "💍", "❤️", "🌟", "🎁", "🥂", "🌹", "🎈", "💖", "📅", "🕯️")
+    val colors = listOf(
+        0xFFE11D48, 0xFF4F46E5, 0xFF0EA5E9, 0xFF10B981,
+        0xFFF59E0B, 0xFFEF4444, 0xFF8B5CF6, 0xFFEC4899
+    ).map { it.toInt() }
 
     if (showPicker) {
         val state = rememberDatePickerState(initialSelectedDateMillis = DateUtils.epochMillisForDate(date))
@@ -71,6 +89,43 @@ fun AddAnniversaryDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+                Text("图标", style = MaterialTheme.typography.labelMedium)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(emojis) { e ->
+                        FilterChip(
+                            selected = emoji == e,
+                            onClick = { emoji = e },
+                            label = { Text(e) }
+                        )
+                    }
+                }
+                Text("颜色", style = MaterialTheme.typography.labelMedium)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    items(colors) { c ->
+                        val isSelected = color == c
+                        Surface(
+                            onClick = { color = c },
+                            shape = CircleShape,
+                            color = Color(c),
+                            modifier = Modifier
+                                .size(36.dp)
+                                .border(
+                                    width = if (isSelected) 3.dp else 0.dp,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
+                                    shape = CircleShape
+                                )
+                        ) {
+                            if (isSelected) {
+                                Icon(
+                                    Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    }
+                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("日期：${DateUtils.formatDate(date)}", style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.width(8.dp))
@@ -94,7 +149,7 @@ fun AddAnniversaryDialog(
         confirmButton = {
             TextButton(
                 enabled = name.isNotBlank(),
-                onClick = { onConfirm(name.trim(), emoji, date, repeat, note.trim()) }
+                onClick = { onConfirm(name.trim(), emoji, color, date, repeat, note.trim()) }
             ) { Text("创建") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } }

@@ -46,13 +46,14 @@ class AnniversaryViewModel @Inject constructor(
         }
     }
 
-    fun add(name: String, emoji: String, date: String, repeatType: String, note: String) {
+    fun add(name: String, emoji: String, colorInt: Int, date: String, repeatType: String, note: String) {
         viewModelScope.launch {
             repo.add(
                 Anniversary(
                     id = UUID.randomUUID().toString(),
                     name = name,
                     emoji = emoji,
+                    colorInt = colorInt,
                     date = date,
                     repeatType = repeatType,
                     note = note

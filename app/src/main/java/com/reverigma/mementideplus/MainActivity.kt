@@ -147,8 +147,8 @@ class MainActivity : ComponentActivity() {
                 if (showAddAnni) {
                     AddAnniversaryDialog(
                         onDismiss = { showAddAnni = false },
-                        onConfirm = { n, e, d, r, nt ->
-                            anniVm.add(n, e, d, r, nt)
+                        onConfirm = { n, e, c, d, r, nt ->
+                            anniVm.add(n, e, c, d, r, nt)
                             showAddAnni = false
                         }
                     )
