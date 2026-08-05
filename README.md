@@ -34,4 +34,4 @@
 - 日历视图、数据导出格式优化（CSV / 加密备份）
 
 ## 仓库
-- GitHub：https://github.com/Reverigma/habittrack-app
+- GitHub：https://github.com/Reverigma/Mementide-Plus
