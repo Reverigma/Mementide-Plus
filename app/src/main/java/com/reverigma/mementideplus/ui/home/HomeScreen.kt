@@ -18,6 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.VerticalAlignTop
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.TaskAlt
@@ -26,6 +30,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -101,7 +107,10 @@ fun HomeScreen(
                         onToggle = { viewModel.toggleToday(item.habit) },
                         onBackfill = { habitToBackfill = item.habit },
                         onEdit = { habitToEdit = item.habit },
-                        onDelete = { habitToDelete = item.habit }
+                        onDelete = { habitToDelete = item.habit },
+                        onMoveTop = { viewModel.moveHabitToTop(item.habit) },
+                        onMoveUp = { viewModel.moveHabitUp(item.habit) },
+                        onMoveDown = { viewModel.moveHabitDown(item.habit) }
                     )
                 }
             }
@@ -123,8 +132,8 @@ fun HomeScreen(
         BackfillDateDialog(
             habit = habitToBackfill!!,
             onDismiss = { habitToBackfill = null },
-            onConfirm = { date, done ->
-                viewModel.setDoneForDate(habitToBackfill!!.id, date, done)
+            onConfirm = { date, done, timestamp ->
+                viewModel.setDoneForDate(habitToBackfill!!.id, date, done, timestamp)
                 habitToBackfill = null
             }
         )
@@ -245,7 +254,10 @@ private fun HabitCard(
     onToggle: () -> Unit,
     onBackfill: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onMoveTop: () -> Unit,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit
 ) {
     val h = item.habit
     val tint = Color(h.colorInt)
@@ -329,6 +341,35 @@ private fun HabitCard(
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
+                }
+                // 排序菜单
+                Box {
+                    var menuOpen by remember { mutableStateOf(false) }
+                    IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(40.dp)) {
+                        Icon(
+                            Icons.Filled.MoreVert,
+                            "更多操作",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                        DropdownMenuItem(
+                            text = { Text("置顶") },
+                            onClick = { menuOpen = false; onMoveTop() },
+                            leadingIcon = { Icon(Icons.Filled.VerticalAlignTop, null, modifier = Modifier.size(18.dp)) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("上移") },
+                            onClick = { menuOpen = false; onMoveUp() },
+                            leadingIcon = { Icon(Icons.Filled.KeyboardArrowUp, null, modifier = Modifier.size(18.dp)) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("下移") },
+                            onClick = { menuOpen = false; onMoveDown() },
+                            leadingIcon = { Icon(Icons.Filled.KeyboardArrowDown, null, modifier = Modifier.size(18.dp)) }
+                        )
+                    }
                 }
             }
         }

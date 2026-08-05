@@ -19,6 +19,13 @@ interface HabitRecordDao {
     @Query("SELECT date FROM habit_records WHERE habitId = :habitId AND done = 1")
     suspend fun getDoneDates(habitId: String): List<String>
 
+    /** 某天所有完成记录（含打卡时间），用于月历/日历视图 */
+    @Query("SELECT * FROM habit_records WHERE date = :date AND done = 1")
+    suspend fun getDoneByDate(date: String): List<HabitRecord>
+
+    @Query("SELECT * FROM habit_records WHERE habitId = :habitId AND done = 1")
+    suspend fun getDoneRecords(habitId: String): List<HabitRecord>
+
     @Query("SELECT * FROM habit_records")
     fun observeAll(): Flow<List<HabitRecord>>
 

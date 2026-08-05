@@ -6,12 +6,15 @@ import androidx.room.PrimaryKey
 const val REPEAT_YEARLY = "yearly"
 const val REPEAT_MONTHLY = "monthly"
 const val REPEAT_NONE = "none"
+const val CALENDAR_SOLAR = "solar"
+const val CALENDAR_LUNAR = "lunar"
 
 /**
  * 纪念日。
  * date 为首次发生日期（yyyy-MM-dd）；
  * repeatType 决定倒计时如何循环：每年 / 每月 / 不重复。
  * 重复方式仅在创建时设定，之后不可改（卡片上不再提供切换）。
+ * calendarType 为公历(solar)/农历(lunar)；农历时 date 为"yyyy-MM-dd"形如的农历月日（月=MM，日=dd）。
  */
 @Entity(tableName = "anniversaries")
 data class Anniversary(
@@ -22,5 +25,6 @@ data class Anniversary(
     val date: String,                          // yyyy-MM-dd，首次发生日期
     val repeatType: String = REPEAT_YEARLY,    // yearly | monthly | none
     val note: String = "",
+    val calendarType: String = CALENDAR_SOLAR, // solar | lunar
     val createdAt: Long = System.currentTimeMillis()
 )

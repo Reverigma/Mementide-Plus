@@ -20,6 +20,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Card
@@ -84,6 +87,47 @@ fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
                         color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.weight(1f)
                     )
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                "月度日历",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(onClick = { viewModel.prevMonth() }) {
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "上月")
+                            }
+                            Text(
+                                state.monthLabel,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            IconButton(onClick = { viewModel.nextMonth() }) {
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "下月")
+                            }
+                            IconButton(onClick = { viewModel.resetMonth() }) {
+                                Icon(Icons.Filled.Today, "回到本月")
+                            }
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        MonthCalendar(
+                            cells = state.monthCells,
+                            activeHabits = state.activeHabits
+                        )
+                    }
                 }
             }
 
@@ -376,5 +420,105 @@ private fun StatBadge(label: String, value: String, color: Color) {
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+/** 月度日历网格（周日起始），每天按完成习惯数着色，今日加边框 */
+@Composable
+private fun MonthCalendar(cells: List<MonthCell>, activeHabits: Int) {
+    val weekdayLabels = listOf("日", "一", "二", "三", "四", "五", "六")
+    Column {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            weekdayLabels.forEach { label ->
+                Text(
+                    label,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        cells.chunked(7).forEach { week ->
+            Row(modifier = Modifier.fillMaxWidth()) {
+                week.forEach { cell ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (cell.date == null) {
+                            Box(modifier = Modifier.size(34.dp))
+                        } else {
+                            val color = cellColor(cell.count, activeHabits)
+                            Box(
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (cell.count > 0) color
+                                        else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
+                                    )
+                                    .then(
+                                        if (cell.isToday) {
+                                            Modifier
+                                                .size(34.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                        } else Modifier
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    cell.date.substring(8, 10).toIntOrNull()?.toString() ?: "",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (cell.count > 0) Color.White
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "打卡密度：",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.width(6.dp))
+            listOf(0, 1, 2, 3).forEach { level ->
+                val c = cellColor(level, activeHabits.coerceAtLeast(1))
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 2.dp)
+                        .size(12.dp)
+                        .clip(CircleShape)
+                        .background(c)
+                )
+            }
+            Spacer(Modifier.width(6.dp))
+            Text(
+                "颜色越深打卡越多",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** 按完成数映射颜色：0 灰、1 浅、2 中、3+ 深（使用习惯主色阶） */
+@Composable
+private fun cellColor(count: Int, activeHabits: Int): Color {
+    val base = MaterialTheme.colorScheme.primary
+    return when {
+        count <= 0 -> MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f)
+        count == 1 -> base.copy(alpha = 0.35f)
+        count == 2 -> base.copy(alpha = 0.6f)
+        else -> base.copy(alpha = 0.9f)
     }
 }

@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Anniversary
 import com.reverigma.mementideplus.util.DateUtils
+import com.reverigma.mementideplus.util.LunarCalendar
 
 @Composable
 fun AnniversaryScreen(
@@ -89,8 +90,8 @@ fun AnniversaryScreen(
         AddAnniversaryDialog(
             initial = toEdit,
             onDismiss = { toEdit = null },
-            onConfirm = { n, e, c, d, r, nt ->
-                viewModel.update(toEdit!!, n, e, c, d, r, nt)
+            onConfirm = { n, e, c, d, r, nt, ct ->
+                viewModel.update(toEdit!!, n, e, c, d, r, nt, ct)
                 toEdit = null
             }
         )
@@ -200,7 +201,7 @@ private fun AnniversaryCard(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "${DateUtils.formatDate(a.date)} · ${repeatLabel(a.repeatType)}",
+                    "${anniversaryDateLabel(a)} · ${repeatLabel(a.repeatType)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -243,6 +244,18 @@ private fun AnniversaryCard(
                 }
             }
         }
+    }
+}
+
+/** 纪念日日期显示：农历显示"八月十五"，公历显示"2026年8月5日" */
+private fun anniversaryDateLabel(a: com.reverigma.mementideplus.data.model.Anniversary): String {
+    return if (a.calendarType == com.reverigma.mementideplus.data.model.CALENDAR_LUNAR) {
+        val parts = a.date.split("-")
+        val m = parts.getOrNull(0)?.toIntOrNull() ?: 1
+        val d = parts.getOrNull(1)?.toIntOrNull() ?: 1
+        "农历${LunarCalendar.lunarLabel(m, d)}"
+    } else {
+        DateUtils.formatDate(a.date)
     }
 }
 

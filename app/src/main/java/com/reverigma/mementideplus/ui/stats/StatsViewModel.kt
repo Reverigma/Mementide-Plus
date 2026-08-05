@@ -16,13 +16,16 @@ import javax.inject.Inject
 
 data class DayCell(val date: String, val count: Int, val weekday: Int)
 data class HabitStat(val habit: Habit, val currentStreak: Int, val totalDone: Int, val thisWeekDone: Int)
+data class MonthCell(val date: String?, val count: Int, val isToday: Boolean, val isWeekend: Boolean = false)
 data class StatsUiState(
     val weeks: List<List<DayCell>> = emptyList(),
     val perHabit: List<HabitStat> = emptyList(),
     val totalCompletions: Int = 0,
     val bestStreak: Int = 0,
     val activeHabits: Int = 0,
-    val maxCount: Int = 1
+    val maxCount: Int = 1,
+    val monthCells: List<MonthCell> = emptyList(),
+    val monthLabel: String = ""
 )
 
 @HiltViewModel
@@ -34,17 +37,29 @@ class StatsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(StatsUiState())
     val uiState: StateFlow<StatsUiState> = _uiState
 
+    /** 月历偏移：0=当月，-1=上月，1=下月 */
+    private val _monthOffset = MutableStateFlow(0)
+    val monthOffset: StateFlow<Int> = _monthOffset
+
     init { load() }
 
     private fun load() {
         viewModelScope.launch {
-            combine(habitRepo.habits(), recordDao.observeAll()) { habits, records ->
-                buildState(habits, records)
+            combine(
+                habitRepo.habits(),
+                recordDao.observeAll(),
+                _monthOffset
+            ) { habits, records, offset ->
+                buildState(habits, records, offset)
             }.collect { _uiState.value = it }
         }
     }
 
-    private fun buildState(habits: List<Habit>, records: List<HabitRecord>): StatsUiState {
+    fun prevMonth() { _monthOffset.value -= 1 }
+    fun nextMonth() { _monthOffset.value += 1 }
+    fun resetMonth() { _monthOffset.value = 0 }
+
+    private fun buildState(habits: List<Habit>, records: List<HabitRecord>, monthOffset: Int): StatsUiState {
         val today = DateUtils.todayStr()
         val done = records.filter { it.done }
         val countMap = done.groupingBy { it.date }.eachCount()
@@ -74,6 +89,26 @@ class StatsViewModel @Inject constructor(
         val total = done.size
         val best = perHabit.maxOfOrNull { it.currentStreak } ?: 0
 
-        return StatsUiState(weeks, perHabit, total, best, habits.size, maxCount)
+        // 月历：当月（或偏移月）从周日开始排
+        val todayDate = DateUtils.parse(today)
+        val monthDate = todayDate.plusMonths(monthOffset.toLong())
+        val year = monthDate.year
+        val month = monthDate.monthValue
+        val firstOfMonth = monthDate.withDayOfMonth(1)
+        val daysInMonth = monthDate.lengthOfMonth()
+        // 周日=0 索引（java.time 周日=7，转成 0..6：周日=0）
+        val leading = (firstOfMonth.dayOfWeek.value % 7)
+        val monthCells = mutableListOf<MonthCell>()
+        repeat(leading) { monthCells.add(MonthCell(null, 0, false)) }
+        for (d in 1..daysInMonth) {
+            val ds = "%04d-%02d-%02d".format(year, month, d)
+            val isToday = ds == today
+            monthCells.add(MonthCell(ds, countMap[ds] ?: 0, isToday))
+        }
+        // 补齐到整周（保持 7 列对齐）
+        while (monthCells.size % 7 != 0) monthCells.add(MonthCell(null, 0, false))
+        val monthLabel = monthDate.format(java.time.format.DateTimeFormatter.ofPattern("yyyy年M月"))
+
+        return StatsUiState(weeks, perHabit, total, best, habits.size, maxCount, monthCells, monthLabel)
     }
 }

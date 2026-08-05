@@ -10,5 +10,6 @@ data class Habit(
     val emoji: String = "✅",
     val colorInt: Int = 0xFF4F46E5.toInt(),
     val targetPerWeek: Int = 7,
+    val sortOrder: Int = 0,
     val createdAt: Long = System.currentTimeMillis()
 )

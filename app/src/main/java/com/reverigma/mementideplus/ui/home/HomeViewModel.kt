@@ -76,25 +76,67 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    /** 补录 / 撤销某一天的打卡 */
-    fun setDoneForDate(habitId: String, date: String, done: Boolean) {
+    /** 补录 / 撤销某一天的打卡；可指定打卡时间（epoch millis） */
+    fun setDoneForDate(habitId: String, date: String, done: Boolean, timestamp: Long = System.currentTimeMillis()) {
         viewModelScope.launch {
-            repo.setDone(habitId, date, done)
+            repo.setDone(habitId, date, done, timestamp)
             refresh()
         }
     }
 
     fun addHabit(name: String, emoji: String, colorInt: Int, targetPerWeek: Int) {
         viewModelScope.launch {
+            val all = repo.habits().first()
+            val nextOrder = (all.maxOfOrNull { it.sortOrder } ?: -1) + 1
             repo.addHabit(
                 Habit(
                     id = UUID.randomUUID().toString(),
                     name = name,
                     emoji = emoji,
                     colorInt = colorInt,
-                    targetPerWeek = targetPerWeek
+                    targetPerWeek = targetPerWeek,
+                    sortOrder = nextOrder
                 )
             )
+            refresh()
+            HabitWidgetProvider.updateAll(appContext)
+        }
+    }
+
+    /** 上移一个位置（sortOrder 交换） */
+    fun moveHabitUp(habit: Habit) {
+        viewModelScope.launch {
+            val all = repo.habits().first().sortedBy { it.sortOrder }
+            val idx = all.indexOfFirst { it.id == habit.id }
+            if (idx <= 0) return@launch
+            val prev = all[idx - 1]
+            repo.updateHabit(habit.copy(sortOrder = prev.sortOrder))
+            repo.updateHabit(prev.copy(sortOrder = habit.sortOrder))
+            refresh()
+            HabitWidgetProvider.updateAll(appContext)
+        }
+    }
+
+    /** 下移一个位置（sortOrder 交换） */
+    fun moveHabitDown(habit: Habit) {
+        viewModelScope.launch {
+            val all = repo.habits().first().sortedBy { it.sortOrder }
+            val idx = all.indexOfFirst { it.id == habit.id }
+            if (idx < 0 || idx >= all.size - 1) return@launch
+            val next = all[idx + 1]
+            repo.updateHabit(habit.copy(sortOrder = next.sortOrder))
+            repo.updateHabit(next.copy(sortOrder = habit.sortOrder))
+            refresh()
+            HabitWidgetProvider.updateAll(appContext)
+        }
+    }
+
+    /** 置顶：排到最前 */
+    fun moveHabitToTop(habit: Habit) {
+        viewModelScope.launch {
+            val all = repo.habits().first().sortedBy { it.sortOrder }
+            val minOrder = all.minOfOrNull { it.sortOrder } ?: 0
+            repo.updateHabit(habit.copy(sortOrder = minOrder - 1))
             refresh()
             HabitWidgetProvider.updateAll(appContext)
         }

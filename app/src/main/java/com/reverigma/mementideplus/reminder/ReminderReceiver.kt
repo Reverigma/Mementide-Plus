@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.reverigma.mementideplus.MainActivity
 import com.reverigma.mementideplus.R
 import com.reverigma.mementideplus.data.settings.AppSettings
+import com.reverigma.mementideplus.util.AnniversaryCountdown
 import com.reverigma.mementideplus.util.DateUtils
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.runBlocking
@@ -63,7 +64,7 @@ class ReminderReceiver : BroadcastReceiver() {
                 // 纪念日提醒：今天到期的纪念日
                 val annis = anniDao.getAll()
                 val todayAnniversaries = annis.filter {
-                    DateUtils.countdownDays(it.date, it.repeatType, today) == 0L
+                    AnniversaryCountdown.countdownDays(it, today) == 0L
                 }
                 if (todayAnniversaries.isNotEmpty()) {
                     val names = todayAnniversaries.joinToString("、") { "${it.emoji} ${it.name}" }

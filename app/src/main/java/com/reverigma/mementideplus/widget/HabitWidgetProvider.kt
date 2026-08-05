@@ -38,7 +38,8 @@ class HabitWidgetProvider : AppWidgetProvider() {
                             com.reverigma.mementideplus.data.model.HabitRecord(
                                 habitId = habitId,
                                 date = today,
-                                done = true
+                                done = true,
+                                timestamp = System.currentTimeMillis()
                             )
                         )
                     } else {

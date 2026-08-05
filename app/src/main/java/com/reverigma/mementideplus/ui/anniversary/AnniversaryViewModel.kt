@@ -8,6 +8,7 @@ import com.reverigma.mementideplus.data.model.REPEAT_NONE
 import com.reverigma.mementideplus.data.model.REPEAT_YEARLY
 import com.reverigma.mementideplus.data.repo.AnniversaryRepository
 import com.reverigma.mementideplus.data.settings.AppSettings
+import com.reverigma.mementideplus.util.AnniversaryCountdown
 import com.reverigma.mementideplus.util.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,13 +46,13 @@ class AnniversaryViewModel @Inject constructor(
             val list = repo.anniversaries().first()
             val today = DateUtils.todayStr()
             val items = list.map { a ->
-                AnniversaryItem(a, DateUtils.countdownDays(a.date, a.repeatType, today))
+                AnniversaryItem(a, AnniversaryCountdown.countdownDays(a, today))
             }.sortedBy { it.countdownDays }
             _uiState.value = AnniversaryUiState(items)
         }
     }
 
-    fun add(name: String, emoji: String, colorInt: Int, date: String, repeatType: String, note: String) {
+    fun add(name: String, emoji: String, colorInt: Int, date: String, repeatType: String, note: String, calendarType: String) {
         viewModelScope.launch {
             repo.add(
                 Anniversary(
@@ -61,7 +62,8 @@ class AnniversaryViewModel @Inject constructor(
                     colorInt = colorInt,
                     date = date,
                     repeatType = repeatType,
-                    note = note
+                    note = note,
+                    calendarType = calendarType
                 )
             )
             refresh()
@@ -69,7 +71,7 @@ class AnniversaryViewModel @Inject constructor(
     }
 
     /** 编辑纪念日：保留 id，仅更新展示属性 */
-    fun update(a: Anniversary, name: String, emoji: String, colorInt: Int, date: String, repeatType: String, note: String) {
+    fun update(a: Anniversary, name: String, emoji: String, colorInt: Int, date: String, repeatType: String, note: String, calendarType: String) {
         viewModelScope.launch {
             repo.update(
                 a.copy(
@@ -78,7 +80,8 @@ class AnniversaryViewModel @Inject constructor(
                     colorInt = colorInt,
                     date = date,
                     repeatType = repeatType,
-                    note = note
+                    note = note,
+                    calendarType = calendarType
                 )
             )
             refresh()
