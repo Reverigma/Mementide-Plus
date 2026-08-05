@@ -95,6 +95,22 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /** 编辑习惯：保留 id 与打卡记录，仅更新展示属性 */
+    fun updateHabit(habit: Habit, name: String, emoji: String, colorInt: Int, targetPerWeek: Int) {
+        viewModelScope.launch {
+            repo.updateHabit(
+                habit.copy(
+                    name = name,
+                    emoji = emoji,
+                    colorInt = colorInt,
+                    targetPerWeek = targetPerWeek
+                )
+            )
+            refresh()
+            HabitWidgetProvider.updateAll(appContext)
+        }
+    }
+
     fun deleteHabit(habit: Habit) {
         viewModelScope.launch {
             repo.deleteHabit(habit)

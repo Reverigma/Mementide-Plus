@@ -31,6 +31,23 @@ class AppSettings @Inject constructor(
     private val _themeMode = MutableStateFlow(prefs.getInt(KEY_THEME, 0))
     val themeMode: StateFlow<Int> = _themeMode.asStateFlow()
 
+    private val _reminderEnabled = MutableStateFlow(prefs.getBoolean(KEY_REMINDER_ENABLED, false))
+    val reminderEnabled: StateFlow<Boolean> = _reminderEnabled.asStateFlow()
+
+    /** 每日提醒时间 "HH:mm"，默认 21:00 */
+    private val _reminderTime = MutableStateFlow(prefs.getString(KEY_REMINDER_TIME, "21:00") ?: "21:00")
+    val reminderTime: StateFlow<String> = _reminderTime.asStateFlow()
+
+    fun setReminderEnabled(enabled: Boolean) {
+        prefs.edit { putBoolean(KEY_REMINDER_ENABLED, enabled) }
+        _reminderEnabled.value = enabled
+    }
+
+    fun setReminderTime(time: String) {
+        prefs.edit { putString(KEY_REMINDER_TIME, time) }
+        _reminderTime.value = time
+    }
+
     fun setAppLockEnabled(enabled: Boolean) {
         prefs.edit { putBoolean(KEY_LOCK, enabled) }
         _appLockEnabled.value = enabled
@@ -76,5 +93,7 @@ class AppSettings @Inject constructor(
         private const val KEY_PIN_HASH = "pin_hash"
         private const val KEY_SALT = "pin_salt"
         private const val KEY_THEME = "theme_mode"
+        private const val KEY_REMINDER_ENABLED = "reminder_enabled"
+        private const val KEY_REMINDER_TIME = "reminder_time"
     }
 }

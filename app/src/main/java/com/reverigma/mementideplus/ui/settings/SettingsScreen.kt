@@ -1,5 +1,8 @@
 package com.reverigma.mementideplus.ui.settings
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -19,8 +22,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.SettingsSystemDaydream
 import androidx.compose.material.icons.outlined.Upload
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,8 +38,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,9 +53,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.core.content.ContextCompat
+import com.reverigma.mementideplus.reminder.ReminderScheduler
 import com.reverigma.mementideplus.util.DateUtils
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -57,11 +67,33 @@ fun SettingsScreen(
     val appLockEnabled by viewModel.appLockEnabled.collectAsState()
     val hasPin by viewModel.hasPin.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
+    val reminderEnabled by viewModel.reminderEnabled.collectAsState()
+    val reminderTime by viewModel.reminderTime.collectAsState()
     var showSetPin by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    fun scheduleReminder() {
+        val parts = viewModel.reminderTime.value.split(":")
+        val hour = parts.getOrNull(0)?.toIntOrNull() ?: 21
+        val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+        ReminderScheduler.schedule(context, hour, minute)
+    }
+
+    val notifPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            viewModel.setReminderEnabled(true)
+            scheduleReminder()
+            status = "已开启每日提醒"
+        } else {
+            status = "需要通知权限才能开启提醒"
+        }
+    }
 
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         if (uri != null) scope.launch {
@@ -170,6 +202,64 @@ fun SettingsScreen(
                 }
             }
 
+            // 每日提醒
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("每日提醒", style = MaterialTheme.typography.titleMedium)
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                "每天定时提醒未完成的习惯，纪念日当天也会提醒。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = reminderEnabled,
+                            onCheckedChange = { checked ->
+                                if (checked) {
+                                    val granted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                                        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                                    if (granted) {
+                                        viewModel.setReminderEnabled(true)
+                                        scheduleReminder()
+                                    } else {
+                                        notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    }
+                                } else {
+                                    viewModel.setReminderEnabled(false)
+                                    ReminderScheduler.cancel(context)
+                                }
+                            }
+                        )
+                    }
+                    if (reminderEnabled) {
+                        Spacer(Modifier.height(14.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Outlined.Notifications,
+                                null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                "提醒时间：${reminderTime}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            TextButton(onClick = { showTimePicker = true }) { Text("修改") }
+                        }
+                    }
+                }
+            }
+
             // 数据备份
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -221,6 +311,29 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+
+    if (showTimePicker) {
+        val initial = viewModel.reminderTime.value.split(":")
+        val timeState = rememberTimePickerState(
+            initialHour = initial.getOrNull(0)?.toIntOrNull() ?: 21,
+            initialMinute = initial.getOrNull(1)?.toIntOrNull() ?: 0,
+            is24Hour = true
+        )
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val hh = "%02d".format(timeState.hour)
+                    val mm = "%02d".format(timeState.minute)
+                    viewModel.setReminderTime("$hh:$mm")
+                    scheduleReminder()
+                    showTimePicker = false
+                }) { Text("确定") }
+            },
+            dismissButton = { TextButton(onClick = { showTimePicker = false }) { Text("取消") } },
+            text = { TimePicker(state = timeState) }
+        )
     }
 
     if (showSetPin) {

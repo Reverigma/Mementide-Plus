@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.reverigma.mementideplus.data.model.Anniversary
 import com.reverigma.mementideplus.data.model.REPEAT_MONTHLY
 import com.reverigma.mementideplus.data.model.REPEAT_NONE
 import com.reverigma.mementideplus.data.model.REPEAT_YEARLY
@@ -44,15 +45,16 @@ import com.reverigma.mementideplus.util.DateUtils
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAnniversaryDialog(
+    initial: Anniversary? = null,
     onDismiss: () -> Unit,
     onConfirm: (name: String, emoji: String, colorInt: Int, date: String, repeat: String, note: String) -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var emoji by remember { mutableStateOf("🎉") }
-    var color by remember { mutableStateOf(0xFFE11D48.toInt()) }
-    var date by remember { mutableStateOf(DateUtils.todayStr()) }
-    var repeat by remember { mutableStateOf(REPEAT_YEARLY) }
-    var note by remember { mutableStateOf("") }
+    var name by remember(initial?.id) { mutableStateOf(initial?.name ?: "") }
+    var emoji by remember(initial?.id) { mutableStateOf(initial?.emoji ?: "🎉") }
+    var color by remember(initial?.id) { mutableStateOf(initial?.colorInt ?: 0xFFE11D48.toInt()) }
+    var date by remember(initial?.id) { mutableStateOf(initial?.date ?: DateUtils.todayStr()) }
+    var repeat by remember(initial?.id) { mutableStateOf(initial?.repeatType ?: REPEAT_YEARLY) }
+    var note by remember(initial?.id) { mutableStateOf(initial?.note ?: "") }
     var showPicker by remember { mutableStateOf(false) }
 
     val emojis = listOf("🎉", "🎂", "💍", "❤️", "🌟", "🎁", "🥂", "🌹", "🎈", "💖", "📅", "🕯️")
@@ -79,7 +81,7 @@ fun AddAnniversaryDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("新建纪念日") },
+        title = { Text(if (initial == null) "新建纪念日" else "编辑纪念日") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
@@ -150,7 +152,7 @@ fun AddAnniversaryDialog(
             TextButton(
                 enabled = name.isNotBlank(),
                 onClick = { onConfirm(name.trim(), emoji, color, date, repeat, note.trim()) }
-            ) { Text("创建") }
+            ) { Text(if (initial == null) "创建" else "保存") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } }
     )

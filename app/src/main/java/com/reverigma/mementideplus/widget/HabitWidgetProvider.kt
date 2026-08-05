@@ -15,7 +15,44 @@ import com.reverigma.mementideplus.util.DateUtils
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.runBlocking
 
+const val ACTION_TOGGLE_HABIT = "com.reverigma.mementideplus.action.TOGGLE_HABIT"
+const val EXTRA_HABIT_ID = "habit_id"
+
 class HabitWidgetProvider : AppWidgetProvider() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == ACTION_TOGGLE_HABIT) {
+            val habitId = intent.getStringExtra(EXTRA_HABIT_ID) ?: return
+            val pendingResult = goAsync()
+            try {
+                val app = context.applicationContext
+                val entryPoint = EntryPointAccessors.fromApplication(app, WidgetEntryPoint::class.java)
+                val habitDao = entryPoint.habitDao()
+                val recordDao = entryPoint.recordDao()
+                runBlocking {
+                    val habit = habitDao.getById(habitId) ?: return@runBlocking
+                    val today = DateUtils.todayStr()
+                    val existing = recordDao.get(habitId, today)
+                    if (existing == null) {
+                        recordDao.upsert(
+                            com.reverigma.mementideplus.data.model.HabitRecord(
+                                habitId = habitId,
+                                date = today,
+                                done = true
+                            )
+                        )
+                    } else {
+                        recordDao.delete(habitId, today)
+                    }
+                }
+                updateAll(app)
+            } finally {
+                pendingResult.finish()
+            }
+            return
+        }
+        super.onReceive(context, intent)
+    }
 
     override fun onUpdate(
         context: Context,
@@ -110,6 +147,16 @@ class HabitWidgetProvider : AppWidgetProvider() {
                     views.setViewVisibility(itemId, android.view.View.VISIBLE)
                     views.setTextColor(dotId, h.colorInt)
                     views.setTextViewText(textId, "${h.emoji} ${h.name}")
+                    // 点击该项直接完成打卡
+                    val toggleIntent = Intent(context, HabitWidgetProvider::class.java).apply {
+                        action = ACTION_TOGGLE_HABIT
+                        putExtra(EXTRA_HABIT_ID, h.id)
+                    }
+                    val togglePending = PendingIntent.getBroadcast(
+                        context, h.id.hashCode(), toggleIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    views.setOnClickPendingIntent(itemId, togglePending)
                 } else {
                     views.setViewVisibility(itemId, android.view.View.GONE)
                 }

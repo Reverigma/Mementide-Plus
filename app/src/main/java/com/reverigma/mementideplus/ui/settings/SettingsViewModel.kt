@@ -27,6 +27,12 @@ class SettingsViewModel @Inject constructor(
     /** 外观主题：0 跟随系统 / 1 浅色 / 2 深色。 */
     val themeMode: StateFlow<Int> = appSettings.themeMode
 
+    /** 每日打卡提醒开关。 */
+    val reminderEnabled: StateFlow<Boolean> = appSettings.reminderEnabled
+
+    /** 每日提醒时间 "HH:mm"。 */
+    val reminderTime: StateFlow<String> = appSettings.reminderTime
+
     /** 本次运行中的「是否处于加锁态」——由后台返回逻辑控制。 */
     private val _isLocked = MutableStateFlow(false)
 
@@ -46,6 +52,8 @@ class SettingsViewModel @Inject constructor(
     fun verifyPin(pin: String): Boolean = appSettings.verifyPin(pin)
     fun removePin() = appSettings.clearPin()
     fun setThemeMode(mode: Int) = appSettings.setThemeMode(mode)
+    fun setReminderEnabled(enabled: Boolean) = appSettings.setReminderEnabled(enabled)
+    fun setReminderTime(time: String) = appSettings.setReminderTime(time)
 
     /** 导出全部数据为 JSON 字符串。 */
     suspend fun exportData(): String = backupRepo.exportJson()

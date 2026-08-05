@@ -63,6 +63,23 @@ class AnniversaryViewModel @Inject constructor(
         }
     }
 
+    /** 编辑纪念日：保留 id，仅更新展示属性 */
+    fun update(a: Anniversary, name: String, emoji: String, colorInt: Int, date: String, repeatType: String, note: String) {
+        viewModelScope.launch {
+            repo.update(
+                a.copy(
+                    name = name,
+                    emoji = emoji,
+                    colorInt = colorInt,
+                    date = date,
+                    repeatType = repeatType,
+                    note = note
+                )
+            )
+            refresh()
+        }
+    }
+
     fun delete(a: Anniversary) {
         viewModelScope.launch {
             repo.delete(a)

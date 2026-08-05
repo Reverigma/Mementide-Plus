@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -60,6 +61,7 @@ fun HomeScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var habitToBackfill by remember { mutableStateOf<Habit?>(null) }
+    var habitToEdit by remember { mutableStateOf<Habit?>(null) }
     var habitToDelete by remember { mutableStateOf<Habit?>(null) }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -96,11 +98,23 @@ fun HomeScreen(
                         item = item,
                         onToggle = { viewModel.toggleToday(item.habit) },
                         onBackfill = { habitToBackfill = item.habit },
+                        onEdit = { habitToEdit = item.habit },
                         onDelete = { habitToDelete = item.habit }
                     )
                 }
             }
         }
+    }
+
+    if (habitToEdit != null) {
+        AddHabitDialog(
+            initial = habitToEdit,
+            onDismiss = { habitToEdit = null },
+            onConfirm = { name, emoji, color, target ->
+                viewModel.updateHabit(habitToEdit!!, name, emoji, color, target)
+                habitToEdit = null
+            }
+        )
     }
 
     if (habitToBackfill != null) {
@@ -227,6 +241,7 @@ private fun HabitCard(
     item: HabitItem,
     onToggle: () -> Unit,
     onBackfill: () -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     val h = item.habit
@@ -287,6 +302,14 @@ private fun HabitCard(
                 Icon(
                     Icons.Filled.EditCalendar,
                     "补录",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
+                Icon(
+                    Icons.Outlined.Edit,
+                    "编辑",
                     modifier = Modifier.size(20.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )

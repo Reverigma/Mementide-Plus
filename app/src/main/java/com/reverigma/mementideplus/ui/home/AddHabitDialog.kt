@@ -31,16 +31,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.reverigma.mementideplus.data.model.Habit
 
 @Composable
 fun AddHabitDialog(
+    initial: Habit? = null,
     onDismiss: () -> Unit,
     onConfirm: (name: String, emoji: String, color: Int, target: Int) -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var emoji by remember { mutableStateOf("✅") }
-    var color by remember { mutableStateOf(0xFF4F46E5.toInt()) }
-    var target by remember { mutableStateOf(7) }
+    var name by remember(initial?.id) { mutableStateOf(initial?.name ?: "") }
+    var emoji by remember(initial?.id) { mutableStateOf(initial?.emoji ?: "✅") }
+    var color by remember(initial?.id) { mutableStateOf(initial?.colorInt ?: 0xFF4F46E5.toInt()) }
+    var target by remember(initial?.id) { mutableStateOf(initial?.targetPerWeek ?: 7) }
 
     val emojis = listOf("✅", "💧", "🏃", "📚", "🧘", "🥗", "😴", "🎯", "💪", "🎨", "🌱", "🎵")
     val colors = listOf(
@@ -50,7 +52,7 @@ fun AddHabitDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("新建习惯") },
+        title = { Text(if (initial == null) "新建习惯" else "编辑习惯") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
@@ -110,7 +112,7 @@ fun AddHabitDialog(
             TextButton(
                 enabled = name.isNotBlank(),
                 onClick = { onConfirm(name.trim(), emoji, color, target) }
-            ) { Text("创建") }
+            ) { Text(if (initial == null) "创建" else "保存") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } }
     )

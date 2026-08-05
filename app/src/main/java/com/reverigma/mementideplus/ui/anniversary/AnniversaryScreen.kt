@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Cake
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,6 +54,7 @@ fun AnniversaryScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var toDelete by remember { mutableStateOf<Anniversary?>(null) }
+    var toEdit by remember { mutableStateOf<Anniversary?>(null) }
 
     Column(modifier = modifier.fillMaxSize()) {
         TopAppBar(
@@ -71,10 +73,25 @@ fun AnniversaryScreen(
                 item { EmptyAnniversaries(onAdd = onAddAnniversary) }
             } else {
                 items(state.items, key = { it.anniversary.id }) { item ->
-                    AnniversaryCard(item = item, onDelete = { toDelete = item.anniversary })
+                    AnniversaryCard(
+                        item = item,
+                        onEdit = { toEdit = item.anniversary },
+                        onDelete = { toDelete = item.anniversary }
+                    )
                 }
             }
         }
+    }
+
+    if (toEdit != null) {
+        AddAnniversaryDialog(
+            initial = toEdit,
+            onDismiss = { toEdit = null },
+            onConfirm = { n, e, c, d, r, nt ->
+                viewModel.update(toEdit!!, n, e, c, d, r, nt)
+                toEdit = null
+            }
+        )
     }
 
     if (toDelete != null) {
@@ -136,7 +153,7 @@ private fun EmptyAnniversaries(onAdd: () -> Unit) {
 }
 
 @Composable
-private fun AnniversaryCard(item: AnniversaryItem, onDelete: () -> Unit) {
+private fun AnniversaryCard(item: AnniversaryItem, onEdit: () -> Unit, onDelete: () -> Unit) {
     val a = item.anniversary
     val tint = Color(a.colorInt)
     val label = when {
@@ -198,6 +215,14 @@ private fun AnniversaryCard(item: AnniversaryItem, onDelete: () -> Unit) {
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.labelMedium,
                     color = labelColor
+                )
+            }
+            IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
+                Icon(
+                    Icons.Outlined.Edit,
+                    "编辑",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             IconButton(onClick = onDelete, modifier = Modifier.size(40.dp)) {
