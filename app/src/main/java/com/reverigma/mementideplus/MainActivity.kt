@@ -14,9 +14,11 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.reverigma.mementideplus.ui.anniversary.AddAnniversaryDialog
@@ -44,7 +47,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    // 与 setContent 内 hiltViewModel() 共享同一 Activity 作用域实例
     private val settingsVm: SettingsViewModel by viewModels()
     private var lastStopTime = 0L
 
@@ -69,7 +71,6 @@ class MainActivity : ComponentActivity() {
                 val hasPin by settingsVm.hasPin.collectAsState()
                 val needsLock by settingsVm.needsLock.collectAsState()
 
-                // 应用锁拦截：开关开 + 已设 PIN + 当前处于加锁态 → 展示锁屏
                 if (lockEnabled && hasPin && needsLock) {
                     LockScreen(
                         verify = settingsVm::verifyPin,
@@ -81,7 +82,10 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     bottomBar = {
-                        NavigationBar {
+                        NavigationBar(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            tonalElevation = NavigationBarDefaults.Elevation
+                        ) {
                             NavigationBarItem(
                                 selected = selected == 0,
                                 onClick = { selected = 0 },
@@ -111,7 +115,12 @@ class MainActivity : ComponentActivity() {
                     floatingActionButton = {
                         if (selected != 2 && selected != 3) {
                             FloatingActionButton(
-                                onClick = { if (selected == 0) showAddHabit = true else showAddAnni = true }
+                                onClick = { if (selected == 0) showAddHabit = true else showAddAnni = true },
+                                shape = FloatingActionButtonDefaults.shape,
+                                elevation = FloatingActionButtonDefaults.elevation(
+                                    defaultElevation = 2.dp,
+                                    pressedElevation = 4.dp
+                                )
                             ) {
                                 Icon(Icons.Filled.Add, "添加")
                             }
@@ -150,7 +159,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        // 冷启动（lastStopTime==0）或离后台超过 30 秒 → 进入加锁态
         val elapsed = if (lastStopTime == 0L) Long.MAX_VALUE else System.currentTimeMillis() - lastStopTime
         if (elapsed > 30_000) settingsVm.lock()
     }

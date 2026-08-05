@@ -10,14 +10,31 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material.icons.outlined.SettingsSystemDaydream
+import androidx.compose.material.icons.outlined.Upload
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,17 +87,61 @@ fun SettingsScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        TopAppBar(title = { Text("设置") })
+        TopAppBar(
+            title = { Text("设置") },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+            )
+        )
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
+            // 外观
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text("外观", style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.height(14.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        listOf(
+                            Triple("跟随系统", 0, Icons.Outlined.SettingsSystemDaydream),
+                            Triple("浅色", 1, Icons.Outlined.LightMode),
+                            Triple("深色", 2, Icons.Outlined.DarkMode)
+                        ).forEach { (label, mode, icon) ->
+                            FilterChip(
+                                selected = themeMode == mode,
+                                onClick = { viewModel.setThemeMode(mode) },
+                                label = { Text(label) },
+                                leadingIcon = {
+                                    Icon(icon, null, modifier = Modifier.size(18.dp))
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 应用锁
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("应用锁", style = MaterialTheme.typography.titleMedium)
-                            Spacer(Modifier.height(2.dp))
+                            Spacer(Modifier.height(4.dp))
                             Text(
                                 "开启后，打开应用需输入 PIN。默认关闭，纯本地、不上传。",
                                 style = MaterialTheme.typography.bodySmall,
@@ -100,8 +161,8 @@ fun SettingsScreen(
                         )
                     }
                     if (appLockEnabled) {
-                        Spacer(Modifier.height(12.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Spacer(Modifier.height(14.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             TextButton(onClick = { showSetPin = true }) { Text("更改 PIN") }
                             TextButton(onClick = { viewModel.removePin() }) { Text("关闭并移除 PIN") }
                         }
@@ -109,37 +170,35 @@ fun SettingsScreen(
                 }
             }
 
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("外观", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf("跟随系统" to 0, "浅色" to 1, "深色" to 2).forEach { (label, mode) ->
-                            FilterChip(
-                                selected = themeMode == mode,
-                                onClick = { viewModel.setThemeMode(mode) },
-                                label = { Text(label) }
-                            )
-                        }
-                    }
-                }
-            }
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
+            // 数据备份
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
                     Text("数据备份", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(8.dp))
                     Text(
                         "导出为 JSON 文件到本机任意位置（系统文件选择器），或导入恢复。数据完全在本地，不上传。",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(Modifier.height(10.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = { exportLauncher.launch("mementide-plus-backup-${DateUtils.todayStr()}.json") }) {
+                    Spacer(Modifier.height(16.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Button(
+                            onClick = { exportLauncher.launch("mementide-plus-backup-${DateUtils.todayStr()}.json") }
+                        ) {
+                            Icon(Icons.Outlined.Upload, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
                             Text("导出备份")
                         }
-                        Button(onClick = { importLauncher.launch(arrayOf("application/json")) }) {
+                        OutlinedButton(
+                            onClick = { importLauncher.launch(arrayOf("application/json")) }
+                        ) {
+                            Icon(Icons.Outlined.Download, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
                             Text("导入备份")
                         }
                     }
@@ -148,7 +207,18 @@ fun SettingsScreen(
 
             status?.let {
                 Spacer(Modifier.height(4.dp))
-                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        it,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         }
     }

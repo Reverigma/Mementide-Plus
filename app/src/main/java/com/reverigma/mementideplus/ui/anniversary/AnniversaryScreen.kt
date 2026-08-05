@@ -1,6 +1,7 @@
 package com.reverigma.mementideplus.ui.anniversary
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,20 +9,28 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Cake
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,23 +53,24 @@ fun AnniversaryScreen(
     var toDelete by remember { mutableStateOf<Anniversary?>(null) }
 
     Column(modifier = modifier.fillMaxSize()) {
-        TopAppBar(title = { Text("纪念日") })
+        TopAppBar(
+            title = { Text("纪念日") },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+            )
+        )
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item {
-                if (state.items.isEmpty()) {
-                    Text(
-                        "还没有纪念日，点右下角 + 添加",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+            if (state.items.isEmpty()) {
+                item { EmptyAnniversaries(onAdd = { /* FAB 处理 */ }) }
+            } else {
+                items(state.items, key = { it.anniversary.id }) { item ->
+                    AnniversaryCard(item = item, onDelete = { toDelete = item.anniversary })
                 }
-            }
-            items(state.items, key = { it.anniversary.id }) { item ->
-                AnniversaryCard(item = item, onDelete = { toDelete = item.anniversary })
             }
         }
     }
@@ -71,10 +81,55 @@ fun AnniversaryScreen(
             title = { Text("删除纪念日") },
             text = { Text("确定删除「${toDelete!!.name}」？") },
             confirmButton = {
-                TextButton(onClick = { viewModel.delete(toDelete!!); toDelete = null }) { Text("删除") }
+                TextButton(
+                    onClick = { viewModel.delete(toDelete!!); toDelete = null }
+                ) { Text("删除", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { toDelete = null }) { Text("取消") } }
         )
+    }
+}
+
+@Composable
+private fun EmptyAnniversaries(onAdd: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.tertiaryContainer,
+            modifier = Modifier.size(72.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Outlined.Cake,
+                    contentDescription = null,
+                    modifier = Modifier.size(36.dp),
+                    tint = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
+        }
+        Spacer(Modifier.height(20.dp))
+        Text(
+            "还没有纪念日",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            "记录生日、纪念日等重要日子，获得倒数提醒",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(20.dp))
+        FilledTonalButton(onClick = onAdd) {
+            Icon(Icons.Outlined.Add, null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text("添加纪念日")
+        }
     }
 }
 
@@ -83,29 +138,66 @@ private fun AnniversaryCard(item: AnniversaryItem, onDelete: () -> Unit) {
     val a = item.anniversary
     val label = when {
         item.countdownDays > 0 -> "还有 ${item.countdownDays} 天"
-        item.countdownDays == 0L -> "就是今天 🎉"
+        item.countdownDays == 0L -> "就是今天"
         else -> "已过 ${-item.countdownDays} 天"
     }
-    Card(modifier = Modifier.fillMaxWidth()) {
+    val labelColor = when {
+        item.countdownDays == 0L -> MaterialTheme.colorScheme.tertiary
+        item.countdownDays in 1..7 -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(a.emoji, fontSize = 24.sp)
-            Spacer(Modifier.width(10.dp))
+            Text(a.emoji, fontSize = 28.sp)
+            Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(a.name, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    a.name,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(Modifier.height(4.dp))
                 Text(
                     "${DateUtils.formatDate(a.date)} · ${repeatLabel(a.repeatType)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (a.note.isNotBlank()) {
-                    Text(a.note, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        a.note,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
-            AssistChip(onClick = {}, label = { Text(label) })
-            IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, "删除") }
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = labelColor.copy(alpha = 0.1f),
+                modifier = Modifier.padding(end = 4.dp)
+            ) {
+                Text(
+                    label,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = labelColor
+                )
+            }
+            IconButton(onClick = onDelete, modifier = Modifier.size(40.dp)) {
+                Icon(
+                    Icons.Filled.Delete,
+                    "删除",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
         }
     }
 }
+
