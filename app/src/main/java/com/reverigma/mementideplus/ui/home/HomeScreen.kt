@@ -60,6 +60,7 @@ fun HomeScreen(
     onAddHabit: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
+    val advancedMode by viewModel.advancedMode.collectAsState()
     var habitToBackfill by remember { mutableStateOf<Habit?>(null) }
     var habitToEdit by remember { mutableStateOf<Habit?>(null) }
     var habitToDelete by remember { mutableStateOf<Habit?>(null) }
@@ -96,6 +97,7 @@ fun HomeScreen(
                 items(state.items, key = { it.habit.id }) { item ->
                     HabitCard(
                         item = item,
+                        showAdvanced = advancedMode,
                         onToggle = { viewModel.toggleToday(item.habit) },
                         onBackfill = { habitToBackfill = item.habit },
                         onEdit = { habitToEdit = item.habit },
@@ -239,6 +241,7 @@ private fun EmptyHabits(onAdd: () -> Unit) {
 @Composable
 private fun HabitCard(
     item: HabitItem,
+    showAdvanced: Boolean,
     onToggle: () -> Unit,
     onBackfill: () -> Unit,
     onEdit: () -> Unit,
@@ -302,29 +305,31 @@ private fun HabitCard(
                 checked = item.doneToday,
                 onCheckedChange = { onToggle() }
             )
-            IconButton(onClick = onBackfill, modifier = Modifier.size(36.dp)) {
-                Icon(
-                    Icons.Filled.EditCalendar,
-                    "补录",
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            IconButton(onClick = onEdit, modifier = Modifier.size(36.dp)) {
-                Icon(
-                    Icons.Outlined.Edit,
-                    "编辑",
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
-                Icon(
-                    Icons.Filled.Delete,
-                    "删除",
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
+            if (showAdvanced) {
+                IconButton(onClick = onBackfill, modifier = Modifier.size(40.dp)) {
+                    Icon(
+                        Icons.Filled.EditCalendar,
+                        "补录",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
+                    Icon(
+                        Icons.Outlined.Edit,
+                        "编辑",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                IconButton(onClick = onDelete, modifier = Modifier.size(40.dp)) {
+                    Icon(
+                        Icons.Filled.Delete,
+                        "删除",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                }
             }
         }
     }

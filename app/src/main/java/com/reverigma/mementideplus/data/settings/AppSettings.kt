@@ -38,6 +38,15 @@ class AppSettings @Inject constructor(
     private val _reminderTime = MutableStateFlow(prefs.getString(KEY_REMINDER_TIME, "21:00") ?: "21:00")
     val reminderTime: StateFlow<String> = _reminderTime.asStateFlow()
 
+    /** 高级模式：开启后卡片显示补录/编辑/删除等进阶操作，默认关闭保持界面简洁。 */
+    private val _advancedMode = MutableStateFlow(prefs.getBoolean(KEY_ADVANCED, false))
+    val advancedMode: StateFlow<Boolean> = _advancedMode.asStateFlow()
+
+    fun setAdvancedMode(enabled: Boolean) {
+        prefs.edit { putBoolean(KEY_ADVANCED, enabled) }
+        _advancedMode.value = enabled
+    }
+
     fun setReminderEnabled(enabled: Boolean) {
         prefs.edit { putBoolean(KEY_REMINDER_ENABLED, enabled) }
         _reminderEnabled.value = enabled
@@ -95,5 +104,6 @@ class AppSettings @Inject constructor(
         private const val KEY_THEME = "theme_mode"
         private const val KEY_REMINDER_ENABLED = "reminder_enabled"
         private const val KEY_REMINDER_TIME = "reminder_time"
+        private const val KEY_ADVANCED = "advanced_mode"
     }
 }

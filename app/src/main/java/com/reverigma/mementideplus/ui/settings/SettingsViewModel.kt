@@ -33,6 +33,9 @@ class SettingsViewModel @Inject constructor(
     /** 每日提醒时间 "HH:mm"。 */
     val reminderTime: StateFlow<String> = appSettings.reminderTime
 
+    /** 高级模式：卡片上显示补录/编辑/删除等进阶操作。 */
+    val advancedMode: StateFlow<Boolean> = appSettings.advancedMode
+
     /** 本次运行中的「是否处于加锁态」——由后台返回逻辑控制。 */
     private val _isLocked = MutableStateFlow(false)
 
@@ -54,6 +57,7 @@ class SettingsViewModel @Inject constructor(
     fun setThemeMode(mode: Int) = appSettings.setThemeMode(mode)
     fun setReminderEnabled(enabled: Boolean) = appSettings.setReminderEnabled(enabled)
     fun setReminderTime(time: String) = appSettings.setReminderTime(time)
+    fun setAdvancedMode(enabled: Boolean) = appSettings.setAdvancedMode(enabled)
 
     /** 导出全部数据为 JSON 字符串。 */
     suspend fun exportData(): String = backupRepo.exportJson()

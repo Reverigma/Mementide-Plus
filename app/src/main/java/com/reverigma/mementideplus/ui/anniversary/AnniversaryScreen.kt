@@ -53,6 +53,7 @@ fun AnniversaryScreen(
     onAddAnniversary: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
+    val advancedMode by viewModel.advancedMode.collectAsState()
     var toDelete by remember { mutableStateOf<Anniversary?>(null) }
     var toEdit by remember { mutableStateOf<Anniversary?>(null) }
 
@@ -75,6 +76,7 @@ fun AnniversaryScreen(
                 items(state.items, key = { it.anniversary.id }) { item ->
                     AnniversaryCard(
                         item = item,
+                        showAdvanced = advancedMode,
                         onEdit = { toEdit = item.anniversary },
                         onDelete = { toDelete = item.anniversary }
                     )
@@ -153,7 +155,12 @@ private fun EmptyAnniversaries(onAdd: () -> Unit) {
 }
 
 @Composable
-private fun AnniversaryCard(item: AnniversaryItem, onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun AnniversaryCard(
+    item: AnniversaryItem,
+    showAdvanced: Boolean,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
     val a = item.anniversary
     val tint = Color(a.colorInt)
     val label = when {
@@ -217,21 +224,23 @@ private fun AnniversaryCard(item: AnniversaryItem, onEdit: () -> Unit, onDelete:
                     color = labelColor
                 )
             }
-            IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    Icons.Outlined.Edit,
-                    "编辑",
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            IconButton(onClick = onDelete, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    Icons.Filled.Delete,
-                    "删除",
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
+            if (showAdvanced) {
+                IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
+                    Icon(
+                        Icons.Outlined.Edit,
+                        "编辑",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                IconButton(onClick = onDelete, modifier = Modifier.size(40.dp)) {
+                    Icon(
+                        Icons.Filled.Delete,
+                        "删除",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                }
             }
         }
     }

@@ -7,6 +7,7 @@ import com.reverigma.mementideplus.data.model.REPEAT_MONTHLY
 import com.reverigma.mementideplus.data.model.REPEAT_NONE
 import com.reverigma.mementideplus.data.model.REPEAT_YEARLY
 import com.reverigma.mementideplus.data.repo.AnniversaryRepository
+import com.reverigma.mementideplus.data.settings.AppSettings
 import com.reverigma.mementideplus.util.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,11 +28,15 @@ data class AnniversaryUiState(
 
 @HiltViewModel
 class AnniversaryViewModel @Inject constructor(
-    private val repo: AnniversaryRepository
+    private val repo: AnniversaryRepository,
+    private val appSettings: AppSettings
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AnniversaryUiState())
     val uiState: StateFlow<AnniversaryUiState> = _uiState
+
+    /** 高级模式：卡片显示编辑/删除按钮。 */
+    val advancedMode: StateFlow<Boolean> = appSettings.advancedMode
 
     init { refresh() }
 

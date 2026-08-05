@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.reverigma.mementideplus.data.model.Habit
 import com.reverigma.mementideplus.data.repo.HabitRepository
+import com.reverigma.mementideplus.data.settings.AppSettings
 import com.reverigma.mementideplus.util.DateUtils
 import com.reverigma.mementideplus.widget.HabitWidgetProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,11 +33,15 @@ data class HomeUiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val repo: HabitRepository
+    private val repo: HabitRepository,
+    private val appSettings: AppSettings
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
+
+    /** 高级模式：卡片显示补录/编辑/删除按钮。 */
+    val advancedMode: StateFlow<Boolean> = appSettings.advancedMode
 
     init { refresh() }
 

@@ -69,6 +69,7 @@ fun SettingsScreen(
     val themeMode by viewModel.themeMode.collectAsState()
     val reminderEnabled by viewModel.reminderEnabled.collectAsState()
     val reminderTime by viewModel.reminderTime.collectAsState()
+    val advancedMode by viewModel.advancedMode.collectAsState()
     var showSetPin by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf<String?>(null) }
@@ -256,6 +257,32 @@ fun SettingsScreen(
                             Spacer(Modifier.width(8.dp))
                             TextButton(onClick = { showTimePicker = true }) { Text("修改") }
                         }
+                    }
+                }
+            }
+
+            // 高级模式
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("高级模式", style = MaterialTheme.typography.titleMedium)
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                "开启后，习惯和纪念日卡片上显示补录、编辑、删除等进阶操作。默认关闭，保持界面简洁。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = advancedMode,
+                            onCheckedChange = { viewModel.setAdvancedMode(it) }
+                        )
                     }
                 }
             }
