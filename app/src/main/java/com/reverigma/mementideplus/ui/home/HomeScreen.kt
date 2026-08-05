@@ -229,10 +229,13 @@ private fun HabitCard(
     onDelete: () -> Unit
 ) {
     val h = item.habit
+    val tint = Color(h.colorInt)
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = CardDefaults.cardColors(
+            containerColor = tint.copy(alpha = if (item.doneToday) 0.10f else 0.06f)
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -241,7 +244,7 @@ private fun HabitCard(
         ) {
             Surface(
                 shape = CircleShape,
-                color = Color(h.colorInt).copy(alpha = 0.12f),
+                color = tint.copy(alpha = 0.20f),
                 modifier = Modifier.size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {

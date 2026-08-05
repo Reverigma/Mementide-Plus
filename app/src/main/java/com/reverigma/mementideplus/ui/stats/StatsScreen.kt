@@ -311,10 +311,11 @@ private fun EmptyStats() {
 @Composable
 private fun HabitStatCard(hs: HabitStat) {
     val h: Habit = hs.habit
+    val tint = Color(h.colorInt)
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = CardDefaults.cardColors(containerColor = tint.copy(alpha = 0.06f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -323,7 +324,7 @@ private fun HabitStatCard(hs: HabitStat) {
         ) {
             Surface(
                 shape = CircleShape,
-                color = androidx.compose.ui.graphics.Color(h.colorInt).copy(alpha = 0.12f),
+                color = tint.copy(alpha = 0.20f),
                 modifier = Modifier.size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
