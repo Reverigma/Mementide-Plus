@@ -55,7 +55,8 @@ import com.reverigma.mementideplus.util.DateUtils
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAddHabit: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
     var habitToBackfill by remember { mutableStateOf<Habit?>(null) }
@@ -88,7 +89,7 @@ fun HomeScreen(
             }
 
             if (state.items.isEmpty()) {
-                item { EmptyHabits(onAdd = { /* FAB 处理添加 */ }) }
+                item { EmptyHabits(onAdd = onAddHabit) }
             } else {
                 items(state.items, key = { it.habit.id }) { item ->
                     HabitCard(

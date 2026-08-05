@@ -128,8 +128,8 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { padding ->
                     when (selected) {
-                        0 -> HomeScreen(homeVm, Modifier.fillMaxSize().padding(padding))
-                        1 -> AnniversaryScreen(anniVm, Modifier.fillMaxSize().padding(padding))
+                        0 -> HomeScreen(homeVm, Modifier.fillMaxSize().padding(padding), onAddHabit = { showAddHabit = true })
+                        1 -> AnniversaryScreen(anniVm, Modifier.fillMaxSize().padding(padding), onAddAnniversary = { showAddAnni = true })
                         2 -> StatsScreen(statsVm, Modifier.fillMaxSize().padding(padding))
                         3 -> SettingsScreen(settingsVm, Modifier.fillMaxSize().padding(padding))
                     }

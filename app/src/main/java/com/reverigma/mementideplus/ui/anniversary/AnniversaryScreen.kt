@@ -47,7 +47,8 @@ import com.reverigma.mementideplus.util.DateUtils
 @Composable
 fun AnniversaryScreen(
     viewModel: AnniversaryViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAddAnniversary: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
     var toDelete by remember { mutableStateOf<Anniversary?>(null) }
@@ -66,7 +67,7 @@ fun AnniversaryScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (state.items.isEmpty()) {
-                item { EmptyAnniversaries(onAdd = { /* FAB 处理 */ }) }
+                item { EmptyAnniversaries(onAdd = onAddAnniversary) }
             } else {
                 items(state.items, key = { it.anniversary.id }) { item ->
                     AnniversaryCard(item = item, onDelete = { toDelete = item.anniversary })
