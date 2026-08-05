@@ -20,6 +20,14 @@ release/
 .gradle/
 build/
 
+# Stale top-level build artifacts (older config wrote here; current build uses app/build/)
+app/intermediates/
+app/kotlin/
+app/kotlinToolingMetadata/
+app/outputs/
+app/tmp/
+app/generated/
+
 # Local configuration file (sdk path, etc)
 local.properties
 
