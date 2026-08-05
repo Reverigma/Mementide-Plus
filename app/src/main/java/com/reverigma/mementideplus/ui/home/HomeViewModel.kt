@@ -1,11 +1,14 @@
 package com.reverigma.mementideplus.ui.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.reverigma.mementideplus.data.model.Habit
 import com.reverigma.mementideplus.data.repo.HabitRepository
 import com.reverigma.mementideplus.util.DateUtils
+import com.reverigma.mementideplus.widget.HabitWidgetProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -28,6 +31,7 @@ data class HomeUiState(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val repo: HabitRepository
 ) : ViewModel() {
 
@@ -63,6 +67,7 @@ class HomeViewModel @Inject constructor(
             val done = repo.isDone(habit.id, today)
             repo.setDone(habit.id, today, !done)
             refresh()
+            HabitWidgetProvider.updateAll(appContext)
         }
     }
 
@@ -86,6 +91,7 @@ class HomeViewModel @Inject constructor(
                 )
             )
             refresh()
+            HabitWidgetProvider.updateAll(appContext)
         }
     }
 
@@ -93,6 +99,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             repo.deleteHabit(habit)
             refresh()
+            HabitWidgetProvider.updateAll(appContext)
         }
     }
 }

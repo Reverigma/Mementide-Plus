@@ -13,6 +13,9 @@ interface HabitRecordDao {
     @Query("SELECT habitId FROM habit_records WHERE date = :date AND done = 1")
     fun observeDoneHabitIds(date: String): Flow<List<String>>
 
+    @Query("SELECT habitId FROM habit_records WHERE date = :date AND done = 1")
+    suspend fun getDoneHabitIds(date: String): List<String>
+
     @Query("SELECT date FROM habit_records WHERE habitId = :habitId AND done = 1")
     suspend fun getDoneDates(habitId: String): List<String>
 

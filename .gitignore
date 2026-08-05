@@ -47,3 +47,7 @@ captures/
 # Local Gradle distribution (downloaded for offline build)
 _g87/
 _g87.zip
+
+# Build environment debris
+.gradle_*/
+b.txt
