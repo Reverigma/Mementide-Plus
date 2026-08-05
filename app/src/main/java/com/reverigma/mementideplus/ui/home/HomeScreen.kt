@@ -284,13 +284,17 @@ private fun HabitCard(
                         Text(
                             "连续 ${item.streak} 天",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.secondary
+                            color = MaterialTheme.colorScheme.secondary,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                     Text(
                         "每周 ${h.targetPerWeek} 次",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
@@ -298,27 +302,27 @@ private fun HabitCard(
                 checked = item.doneToday,
                 onCheckedChange = { onToggle() }
             )
-            IconButton(onClick = onBackfill, modifier = Modifier.size(40.dp)) {
+            IconButton(onClick = onBackfill, modifier = Modifier.size(36.dp)) {
                 Icon(
                     Icons.Filled.EditCalendar,
                     "补录",
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
+            IconButton(onClick = onEdit, modifier = Modifier.size(36.dp)) {
                 Icon(
                     Icons.Outlined.Edit,
                     "编辑",
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            IconButton(onClick = onDelete, modifier = Modifier.size(40.dp)) {
+            IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
                 Icon(
                     Icons.Filled.Delete,
                     "删除",
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
             }
