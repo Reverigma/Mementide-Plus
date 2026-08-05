@@ -45,6 +45,9 @@ class SettingsViewModel @Inject constructor(
     /** 统计页视图顺序："month,heatmap" 或 "heatmap,month"。 */
     val statsViewOrder: StateFlow<String> = appSettings.statsViewOrder
 
+    /** 点击卡片 emoji 弹出海报预览。 */
+    val posterTap: StateFlow<Boolean> = appSettings.posterTap
+
     /** 本次运行中的「是否处于加锁态」——由后台返回逻辑控制。 */
     private val _isLocked = MutableStateFlow(false)
 
@@ -70,6 +73,7 @@ class SettingsViewModel @Inject constructor(
     fun setStatsMonthCalendar(enabled: Boolean) = appSettings.setStatsMonthCalendar(enabled)
     fun setStatsHeatmap(enabled: Boolean) = appSettings.setStatsHeatmap(enabled)
     fun setStatsViewOrder(order: String) = appSettings.setStatsViewOrder(order)
+    fun setPosterTap(enabled: Boolean) = appSettings.setPosterTap(enabled)
 
     /** 导出全部数据为 JSON 字符串。 */
     suspend fun exportData(): String = backupRepo.exportJson()

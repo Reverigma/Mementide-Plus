@@ -39,6 +39,9 @@ class AnniversaryViewModel @Inject constructor(
     /** 高级模式：卡片显示编辑/删除按钮。 */
     val advancedMode: StateFlow<Boolean> = appSettings.advancedMode
 
+    /** 点击卡片 emoji 弹出海报预览。 */
+    val posterTap: StateFlow<Boolean> = appSettings.posterTap
+
     init { refresh() }
 
     private fun refresh() {

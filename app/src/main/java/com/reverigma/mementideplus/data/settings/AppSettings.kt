@@ -54,9 +54,18 @@ class AppSettings @Inject constructor(
     private val _statsViewOrder = MutableStateFlow(prefs.getString(KEY_STATS_ORDER, "month,heatmap") ?: "month,heatmap")
     val statsViewOrder: StateFlow<String> = _statsViewOrder.asStateFlow()
 
+    /** 点击卡片 emoji 弹出海报预览（默认开） */
+    private val _posterTap = MutableStateFlow(prefs.getBoolean(KEY_POSTER_TAP, true))
+    val posterTap: StateFlow<Boolean> = _posterTap.asStateFlow()
+
     fun setAdvancedMode(enabled: Boolean) {
         prefs.edit { putBoolean(KEY_ADVANCED, enabled) }
         _advancedMode.value = enabled
+    }
+
+    fun setPosterTap(enabled: Boolean) {
+        prefs.edit { putBoolean(KEY_POSTER_TAP, enabled) }
+        _posterTap.value = enabled
     }
 
     fun setStatsMonthCalendar(enabled: Boolean) {
@@ -135,5 +144,6 @@ class AppSettings @Inject constructor(
         private const val KEY_STATS_MONTH = "stats_month_calendar"
         private const val KEY_STATS_HEATMAP = "stats_heatmap"
         private const val KEY_STATS_ORDER = "stats_view_order"
+        private const val KEY_POSTER_TAP = "poster_tap"
     }
 }

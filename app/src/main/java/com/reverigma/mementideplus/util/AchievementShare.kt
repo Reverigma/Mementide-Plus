@@ -18,15 +18,35 @@ object AchievementShare {
 
     fun share(context: Context, habit: Habit, streak: Int, totalDone: Int, thisWeekDone: Int) {
         val bmp = AchievementCardGenerator.generate(habit, streak, totalDone, thisWeekDone)
+        shareBitmap(context, bmp, "我在 Mementide Plus 连续打卡 $streak 天（${habit.emoji} ${habit.name}）💪")
+    }
+
+    /** 分享纪念日海报 */
+    fun shareAnniversary(context: Context, anniversary: com.reverigma.mementideplus.data.model.Anniversary, countdownDays: Long) {
+        val bmp = AchievementCardGenerator.generateAnniversary(
+            anniversary,
+            countdownDays,
+            AchievementCardGenerator.anniversaryDateLabel(anniversary)
+        )
+        val text = when {
+            countdownDays > 0 -> "距离 ${anniversary.emoji} ${anniversary.name} 还有 $countdownDays 天"
+            countdownDays == 0L -> "今天就是 ${anniversary.emoji} ${anniversary.name}！"
+            else -> "${anniversary.emoji} ${anniversary.name} 已过 ${-countdownDays} 天"
+        }
+        shareBitmap(context, bmp, text)
+    }
+
+    /** 分享任意位图（存入相册 + 系统分享面板） */
+    fun shareBitmap(context: Context, bmp: android.graphics.Bitmap, text: String) {
         val fileName = "mementide-${System.currentTimeMillis()}.png"
         val uri = save(context, bmp, fileName)
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_TEXT, "我在 Mementide Plus 连续打卡 $streak 天（${habit.emoji} ${habit.name}）💪")
+            putExtra(Intent.EXTRA_TEXT, text)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(intent, "分享打卡成就"))
+        context.startActivity(Intent.createChooser(intent, "分享海报"))
     }
 
     private fun save(context: Context, bmp: android.graphics.Bitmap, fileName: String): Uri {

@@ -1,5 +1,6 @@
 package com.reverigma.mementideplus.ui.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,11 +53,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Habit
+import com.reverigma.mementideplus.ui.components.PosterDialog
 import com.reverigma.mementideplus.ui.home.dialogs.BackfillDateDialog
+import com.reverigma.mementideplus.util.AchievementCardGenerator
+import com.reverigma.mementideplus.util.AchievementShare
 import com.reverigma.mementideplus.util.DateUtils
 
 @Composable
@@ -67,9 +72,11 @@ fun HomeScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val advancedMode by viewModel.advancedMode.collectAsState()
+    val posterTap by viewModel.posterTap.collectAsState()
     var habitToBackfill by remember { mutableStateOf<Habit?>(null) }
     var habitToEdit by remember { mutableStateOf<Habit?>(null) }
     var habitToDelete by remember { mutableStateOf<Habit?>(null) }
+    var habitPoster by remember { mutableStateOf<HabitItem?>(null) }
 
     Column(modifier = modifier.fillMaxSize()) {
         TopAppBar(
@@ -104,6 +111,8 @@ fun HomeScreen(
                     HabitCard(
                         item = item,
                         showAdvanced = advancedMode,
+                        posterEnabled = posterTap,
+                        onPoster = { habitPoster = item },
                         onToggle = { viewModel.toggleToday(item.habit) },
                         onBackfill = { habitToBackfill = item.habit },
                         onEdit = { habitToEdit = item.habit },
@@ -150,6 +159,31 @@ fun HomeScreen(
                 ) { Text("删除", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { habitToDelete = null }) { Text("取消") } }
+        )
+    }
+
+    // 打卡成就海报预览
+    if (habitPoster != null) {
+        val posterItem = habitPoster!!
+        val bmp = remember(posterItem.habit.id, posterItem.doneToday, posterItem.streak) {
+            AchievementCardGenerator.generate(
+                posterItem.habit,
+                posterItem.streak,
+                posterItem.totalDone,
+                posterItem.thisWeekDone
+            )
+        }
+        val ctx = LocalContext.current
+        PosterDialog(
+            bitmap = bmp,
+            onShare = {
+                AchievementShare.shareBitmap(
+                    ctx, bmp,
+                    "我在 Mementide Plus 连续打卡 ${posterItem.streak} 天（${posterItem.habit.emoji} ${posterItem.habit.name}）💪"
+                )
+                habitPoster = null
+            },
+            onDismiss = { habitPoster = null }
         )
     }
 }
@@ -251,6 +285,8 @@ private fun EmptyHabits(onAdd: () -> Unit) {
 private fun HabitCard(
     item: HabitItem,
     showAdvanced: Boolean,
+    posterEnabled: Boolean,
+    onPoster: () -> Unit,
     onToggle: () -> Unit,
     onBackfill: () -> Unit,
     onEdit: () -> Unit,
@@ -276,7 +312,13 @@ private fun HabitCard(
             Surface(
                 shape = CircleShape,
                 color = tint.copy(alpha = 0.20f),
-                modifier = Modifier.size(44.dp)
+                modifier = Modifier
+                    .size(44.dp)
+                    .then(
+                        if (posterEnabled) {
+                            Modifier.clickable(onClick = onPoster)
+                        } else Modifier
+                    )
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(h.emoji, fontSize = 22.sp)

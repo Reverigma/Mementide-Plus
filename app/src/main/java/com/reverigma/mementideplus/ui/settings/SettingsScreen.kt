@@ -73,6 +73,7 @@ fun SettingsScreen(
     val statsMonthCalendar by viewModel.statsMonthCalendar.collectAsState()
     val statsHeatmap by viewModel.statsHeatmap.collectAsState()
     val statsViewOrder by viewModel.statsViewOrder.collectAsState()
+    val posterTap by viewModel.posterTap.collectAsState()
     var showSetPin by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf<String?>(null) }
@@ -380,6 +381,32 @@ fun SettingsScreen(
                                     viewModel.setStatsViewOrder("heatmap,month")
                                 }
                             }
+                        )
+                    }
+                }
+            }
+
+            // 海报预览
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("海报预览", style = MaterialTheme.typography.titleMedium)
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                "点击习惯或纪念日卡片上的 emoji，弹出对应的海报，可右上角分享。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = posterTap,
+                            onCheckedChange = { viewModel.setPosterTap(it) }
                         )
                     }
                 }

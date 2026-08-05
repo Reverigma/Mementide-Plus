@@ -24,7 +24,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -41,13 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.collectAsState
 import com.reverigma.mementideplus.data.model.Habit
-import com.reverigma.mementideplus.util.AchievementShare
 import com.reverigma.mementideplus.util.DateUtils
 
 @Composable
@@ -372,7 +369,6 @@ private fun EmptyStats() {
 private fun HabitStatCard(hs: HabitStat) {
     val h: Habit = hs.habit
     val tint = Color(h.colorInt)
-    val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -406,14 +402,6 @@ private fun HabitStatCard(hs: HabitStat) {
                     StatBadge("总完成", "${hs.totalDone}", MaterialTheme.colorScheme.secondary)
                     StatBadge("本周", "${hs.thisWeekDone}", MaterialTheme.colorScheme.tertiary)
                 }
-            }
-            IconButton(onClick = { AchievementShare.share(context, h, hs.currentStreak, hs.totalDone, hs.thisWeekDone) }) {
-                Icon(
-                    Icons.Outlined.Share,
-                    "分享成就",
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }

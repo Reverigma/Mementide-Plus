@@ -1,5 +1,6 @@
 package com.reverigma.mementideplus.ui.anniversary
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,9 +42,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Anniversary
+import com.reverigma.mementideplus.ui.components.PosterDialog
+import com.reverigma.mementideplus.util.AchievementCardGenerator
+import com.reverigma.mementideplus.util.AchievementShare
 import com.reverigma.mementideplus.util.DateUtils
 import com.reverigma.mementideplus.util.LunarCalendar
 
@@ -55,8 +60,10 @@ fun AnniversaryScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val advancedMode by viewModel.advancedMode.collectAsState()
+    val posterTap by viewModel.posterTap.collectAsState()
     var toDelete by remember { mutableStateOf<Anniversary?>(null) }
     var toEdit by remember { mutableStateOf<Anniversary?>(null) }
+    var posterItem by remember { mutableStateOf<AnniversaryItem?>(null) }
 
     Column(modifier = modifier.fillMaxSize()) {
         TopAppBar(
@@ -78,6 +85,8 @@ fun AnniversaryScreen(
                     AnniversaryCard(
                         item = item,
                         showAdvanced = advancedMode,
+                        posterEnabled = posterTap,
+                        onPoster = { posterItem = item },
                         onEdit = { toEdit = item.anniversary },
                         onDelete = { toDelete = item.anniversary }
                     )
@@ -108,6 +117,27 @@ fun AnniversaryScreen(
                 ) { Text("删除", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { toDelete = null }) { Text("取消") } }
+        )
+    }
+
+    // 纪念日海报预览
+    if (posterItem != null) {
+        val p = posterItem!!
+        val bmp = remember(p.anniversary.id, p.countdownDays) {
+            AchievementCardGenerator.generateAnniversary(
+                p.anniversary,
+                p.countdownDays,
+                AchievementCardGenerator.anniversaryDateLabel(p.anniversary)
+            )
+        }
+        val ctx = LocalContext.current
+        PosterDialog(
+            bitmap = bmp,
+            onShare = {
+                AchievementShare.shareAnniversary(ctx, p.anniversary, p.countdownDays)
+                posterItem = null
+            },
+            onDismiss = { posterItem = null }
         )
     }
 }
@@ -159,6 +189,8 @@ private fun EmptyAnniversaries(onAdd: () -> Unit) {
 private fun AnniversaryCard(
     item: AnniversaryItem,
     showAdvanced: Boolean,
+    posterEnabled: Boolean,
+    onPoster: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -187,7 +219,13 @@ private fun AnniversaryCard(
             Surface(
                 shape = CircleShape,
                 color = tint.copy(alpha = 0.20f),
-                modifier = Modifier.size(44.dp)
+                modifier = Modifier
+                    .size(44.dp)
+                    .then(
+                        if (posterEnabled) {
+                            Modifier.clickable(onClick = onPoster)
+                        } else Modifier
+                    )
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(a.emoji, fontSize = 22.sp)

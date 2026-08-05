@@ -20,7 +20,9 @@ import javax.inject.Inject
 data class HabitItem(
     val habit: Habit,
     val doneToday: Boolean,
-    val streak: Int
+    val streak: Int,
+    val totalDone: Int = 0,
+    val thisWeekDone: Int = 0
 )
 
 data class HomeUiState(
@@ -43,18 +45,24 @@ class HomeViewModel @Inject constructor(
     /** 高级模式：卡片显示补录/编辑/删除按钮。 */
     val advancedMode: StateFlow<Boolean> = appSettings.advancedMode
 
+    /** 点击卡片 emoji 弹出海报预览。 */
+    val posterTap: StateFlow<Boolean> = appSettings.posterTap
+
     init { refresh() }
 
     private fun refresh() {
         viewModelScope.launch {
             val habitList = repo.habits().first()
             val today = DateUtils.todayStr()
+            val mon = DateUtils.thisWeekMonday(today)
             val items = habitList.map { h ->
                 val doneDates = repo.getDoneDates(h.id)
                 HabitItem(
                     habit = h,
                     doneToday = doneDates.contains(today),
-                    streak = DateUtils.currentStreak(doneDates, today)
+                    streak = DateUtils.currentStreak(doneDates, today),
+                    totalDone = doneDates.size,
+                    thisWeekDone = doneDates.count { it >= mon }
                 )
             }
             _uiState.value = HomeUiState(
