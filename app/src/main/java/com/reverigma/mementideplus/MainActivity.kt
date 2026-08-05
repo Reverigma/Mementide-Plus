@@ -7,6 +7,8 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cake
@@ -23,10 +25,13 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
@@ -44,6 +49,7 @@ import com.reverigma.mementideplus.ui.stats.StatsScreen
 import com.reverigma.mementideplus.ui.stats.StatsViewModel
 import com.reverigma.mementideplus.ui.theme.MementideTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -67,6 +73,13 @@ class MainActivity : ComponentActivity() {
                 var showAddHabit by remember { mutableStateOf(false) }
                 var showAddAnni by remember { mutableStateOf(false) }
 
+                // 左右滑动翻页（底部导航联动）
+                val pagerState = rememberPagerState(initialPage = 0) { 4 }
+                val scope = rememberCoroutineScope()
+                LaunchedEffect(pagerState) {
+                    snapshotFlow { pagerState.currentPage }.collect { selected = it }
+                }
+
                 val lockEnabled by settingsVm.appLockEnabled.collectAsState()
                 val hasPin by settingsVm.hasPin.collectAsState()
                 val needsLock by settingsVm.needsLock.collectAsState()
@@ -88,25 +101,25 @@ class MainActivity : ComponentActivity() {
                         ) {
                             NavigationBarItem(
                                 selected = selected == 0,
-                                onClick = { selected = 0 },
+                                onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
                                 icon = { Icon(Icons.Filled.CheckCircle, "今日") },
                                 label = { Text("今日") }
                             )
                             NavigationBarItem(
                                 selected = selected == 1,
-                                onClick = { selected = 1 },
+                                onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
                                 icon = { Icon(Icons.Filled.Cake, "纪念日") },
                                 label = { Text("纪念日") }
                             )
                             NavigationBarItem(
                                 selected = selected == 2,
-                                onClick = { selected = 2 },
+                                onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
                                 icon = { Icon(Icons.Filled.ShowChart, "统计") },
                                 label = { Text("统计") }
                             )
                             NavigationBarItem(
                                 selected = selected == 3,
-                                onClick = { selected = 3 },
+                                onClick = { scope.launch { pagerState.animateScrollToPage(3) } },
                                 icon = { Icon(Icons.Filled.Settings, "设置") },
                                 label = { Text("设置") }
                             )
@@ -127,11 +140,16 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { padding ->
-                    when (selected) {
-                        0 -> HomeScreen(homeVm, Modifier.fillMaxSize().padding(padding), onAddHabit = { showAddHabit = true })
-                        1 -> AnniversaryScreen(anniVm, Modifier.fillMaxSize().padding(padding), onAddAnniversary = { showAddAnni = true })
-                        2 -> StatsScreen(statsVm, Modifier.fillMaxSize().padding(padding))
-                        3 -> SettingsScreen(settingsVm, Modifier.fillMaxSize().padding(padding))
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize().padding(padding)
+                    ) { page ->
+                        when (page) {
+                            0 -> HomeScreen(homeVm, Modifier.fillMaxSize(), onAddHabit = { showAddHabit = true })
+                            1 -> AnniversaryScreen(anniVm, Modifier.fillMaxSize(), onAddAnniversary = { showAddAnni = true })
+                            2 -> StatsScreen(statsVm, Modifier.fillMaxSize())
+                            3 -> SettingsScreen(settingsVm, Modifier.fillMaxSize())
+                        }
                     }
                 }
 
