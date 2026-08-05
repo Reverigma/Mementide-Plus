@@ -109,7 +109,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
                     val h = undone[i]
                     views.setViewVisibility(itemId, android.view.View.VISIBLE)
                     views.setTextColor(dotId, h.colorInt)
-                    views.setTextViewText(textId, "${h.icon} ${h.name}")
+                    views.setTextViewText(textId, "${h.emoji} ${h.name}")
                 } else {
                     views.setViewVisibility(itemId, android.view.View.GONE)
                 }
