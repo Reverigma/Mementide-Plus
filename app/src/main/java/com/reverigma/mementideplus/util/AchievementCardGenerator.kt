@@ -191,7 +191,7 @@ object AchievementCardGenerator {
         }
         canvas.drawLine(200f, 1080f, W - 200f, 1080f, linePaint)
 
-        // 底部数据：日期 / 重复
+        // 底部数据：日期（居中展示，去掉重复周期）
         val statNumPaint = Paint().apply {
             textSize = 60f
             textAlign = Paint.Align.CENTER
@@ -204,10 +204,8 @@ object AchievementCardGenerator {
             color = Color.parseColor("#9CA3AF")
             typeface = Typeface.create("sans-serif", Typeface.NORMAL)
         }
-        canvas.drawText(dateLabel, W * 0.33f, 1210f, statNumPaint)
-        canvas.drawText(anniversary.repeatTypeLabel(), W * 0.67f, 1210f, statNumPaint)
-        canvas.drawText("纪念日", W * 0.33f, 1280f, statLabelPaint)
-        canvas.drawText("重复周期", W * 0.67f, 1280f, statLabelPaint)
+        canvas.drawText(dateLabel, W / 2f, 1210f, statNumPaint)
+        canvas.drawText("纪念日", W / 2f, 1280f, statLabelPaint)
 
         // 备注（可选）
         if (anniversary.note.isNotBlank()) {
@@ -231,13 +229,6 @@ object AchievementCardGenerator {
         canvas.drawText("Mementide Plus", W / 2f, 1400f, watermarkPaint)
 
         return bitmap
-    }
-
-    /** 纪念日重复周期中文标签 */
-    private fun Anniversary.repeatTypeLabel(): String = when (repeatType) {
-        com.reverigma.mementideplus.data.model.REPEAT_YEARLY -> "每年"
-        com.reverigma.mementideplus.data.model.REPEAT_MONTHLY -> "每月"
-        else -> "不重复"
     }
 
     /** 纪念日日期显示（农历/公历） */
