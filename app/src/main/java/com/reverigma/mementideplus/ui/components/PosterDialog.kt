@@ -22,15 +22,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 /**
  * 海报预览对话框：展示生成的海报图，右上角分享按钮。
- * - 图片按自身比例缩放，背景框随内容收紧，避免纵向撑满屏幕
- * - 全屏透明遮罩可点击关闭（点框旁任意区域都灵敏返回），框内点击不会误关
+ * 使用全屏窗口 + 半透明遮罩，点击框旁任意位置灵敏关闭。
  * @param bitmap 生成的海报位图
  * @param onShare 点击分享按钮回调（由调用方触发保存 + 系统分享）
  * @param onDismiss 关闭对话框
@@ -41,11 +42,15 @@ fun PosterDialog(
     onShare: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
-        // 全屏遮罩：点击框旁任意区域关闭对话框（灵敏返回）
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        // 全屏半透明遮罩：点击任意位置关闭（灵敏返回）
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.45f))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -62,10 +67,7 @@ fun PosterDialog(
                         indication = null,
                         onClick = {}
                     )
-                    .background(
-                        androidx.compose.ui.graphics.Color.White,
-                        RoundedCornerShape(20.dp)
-                    ),
+                    .background(Color.White, RoundedCornerShape(20.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -80,7 +82,7 @@ fun PosterDialog(
                 // 右上角分享按钮（浮在海报上，白底圆）
                 Surface(
                     shape = CircleShape,
-                    color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.92f),
+                    color = Color.White.copy(alpha = 0.92f),
                     shadowElevation = 4.dp,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -90,7 +92,7 @@ fun PosterDialog(
                         Icon(
                             Icons.Filled.Share,
                             contentDescription = "分享",
-                            tint = androidx.compose.ui.graphics.Color(0xFF1F2937),
+                            tint = Color(0xFF1F2937),
                             modifier = Modifier.size(24.dp)
                         )
                     }
