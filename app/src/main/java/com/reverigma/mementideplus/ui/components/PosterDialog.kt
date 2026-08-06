@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
 /**
- * 海报预览对话框：全屏展示生成的海报图，右上角分享按钮。
+ * 海报预览对话框：展示生成的海报图，右上角分享按钮。
+ * 图片按自身比例缩放，背景框随内容收紧，避免纵向撑满屏幕。
  * @param bitmap 生成的海报位图
  * @param onShare 点击分享按钮回调（由调用方触发保存 + 系统分享）
  * @param onDismiss 关闭对话框
@@ -39,17 +40,20 @@ fun PosterDialog(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(24.dp)
                 .background(
                     androidx.compose.ui.graphics.Color.White,
-                    RoundedCornerShape(16.dp)
-                )
-                .padding(12.dp),
+                    RoundedCornerShape(20.dp)
+                ),
             contentAlignment = Alignment.Center
         ) {
             Image(
                 bitmap = bitmap.asImageBitmap(),
                 contentDescription = "海报",
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(bitmap.width.toFloat() / bitmap.height.toFloat())
+                    .padding(12.dp),
                 contentScale = ContentScale.Fit
             )
             // 右上角分享按钮（浮在海报上，白底圆）
