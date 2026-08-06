@@ -22,8 +22,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -99,29 +99,41 @@ class MainActivity : ComponentActivity() {
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
                             tonalElevation = NavigationBarDefaults.Elevation
                         ) {
+                            // 选中态用主色（靛蓝），取代默认的 secondaryContainer（蓝绿）
+                            val navColors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                             NavigationBarItem(
                                 selected = selected == 0,
-                                onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
+                                onClick = { scope.launch { pagerState.scrollToPage(0) } },
+                                colors = navColors,
                                 icon = { Icon(Icons.Filled.CheckCircle, "今日") },
-                                label = { Text("今日") }
+                                label = null
                             )
                             NavigationBarItem(
                                 selected = selected == 1,
-                                onClick = { scope.launch { pagerState.animateScrollToPage(1) } },
+                                onClick = { scope.launch { pagerState.scrollToPage(1) } },
+                                colors = navColors,
                                 icon = { Icon(Icons.Filled.Cake, "纪念日") },
-                                label = { Text("纪念日") }
+                                label = null
                             )
                             NavigationBarItem(
                                 selected = selected == 2,
-                                onClick = { scope.launch { pagerState.animateScrollToPage(2) } },
+                                onClick = { scope.launch { pagerState.scrollToPage(2) } },
+                                colors = navColors,
                                 icon = { Icon(Icons.Filled.ShowChart, "统计") },
-                                label = { Text("统计") }
+                                label = null
                             )
                             NavigationBarItem(
                                 selected = selected == 3,
-                                onClick = { scope.launch { pagerState.animateScrollToPage(3) } },
+                                onClick = { scope.launch { pagerState.scrollToPage(3) } },
+                                colors = navColors,
                                 icon = { Icon(Icons.Filled.Settings, "设置") },
-                                label = { Text("设置") }
+                                label = null
                             )
                         }
                     },
