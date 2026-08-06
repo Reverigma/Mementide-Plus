@@ -13,7 +13,7 @@ import com.reverigma.mementideplus.data.model.HabitRecord
 
 @Database(
     entities = [Habit::class, HabitRecord::class, Anniversary::class],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -44,6 +44,14 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("UPDATE habits SET iconName = 'star' WHERE iconName = ''")
                 db.execSQL("UPDATE anniversaries SET iconName = 'cake' WHERE iconName = ''")
+            }
+        }
+
+        /** v6 -> v7：habits / anniversaries 加 imagePath（关联图片，海报背景用，默认空=无图） */
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE habits ADD COLUMN imagePath TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE anniversaries ADD COLUMN imagePath TEXT NOT NULL DEFAULT ''")
             }
         }
     }

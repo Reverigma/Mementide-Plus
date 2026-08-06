@@ -23,6 +23,8 @@ data class Anniversary(
     val emoji: String = "🎉",
     /** 非空时使用 Material Icon（存图标名），空时使用 emoji */
     val iconName: String = "",
+    /** 关联图片的本地绝对路径（可选），生成海报时作为背景图 */
+    val imagePath: String = "",
     val colorInt: Int = 0xFFE11D48.toInt(),       // 卡片主题色（玫瑰红）
     val date: String,                          // yyyy-MM-dd，首次发生日期
     val repeatType: String = REPEAT_YEARLY,    // yearly | monthly | none

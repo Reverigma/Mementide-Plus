@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,8 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.collectAsState
-import com.reverigma.mementideplus.data.model.Habit
-import com.reverigma.mementideplus.ui.components.HabitIcon
 import com.reverigma.mementideplus.util.DateUtils
 
 @Composable
@@ -162,19 +159,6 @@ fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
                             }
                         }
                     }
-                }
-            }
-
-            if (state.perHabit.isNotEmpty()) {
-                item {
-                    Text(
-                        "各习惯",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-                items(state.perHabit, key = { it.habit.id }) { hs ->
-                    HabitStatCard(hs)
                 }
             }
         }
@@ -366,69 +350,6 @@ private fun EmptyStats() {
     }
 }
 
-@Composable
-private fun HabitStatCard(hs: HabitStat) {
-    val h: Habit = hs.habit
-    val tint = Color(h.colorInt)
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = tint.copy(alpha = 0.06f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                shape = CircleShape,
-                color = tint.copy(alpha = 0.20f),
-                modifier = Modifier.size(44.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    HabitIcon(
-                        iconName = h.iconName,
-                        tint = tint,
-                        iconSize = 22
-                    )
-                }
-            }
-            Spacer(Modifier.width(14.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    h.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    StatBadge("连续", "${hs.currentStreak}天", MaterialTheme.colorScheme.primary)
-                    StatBadge("总完成", "${hs.totalDone}", MaterialTheme.colorScheme.secondary)
-                    StatBadge("本周", "${hs.thisWeekDone}", MaterialTheme.colorScheme.tertiary)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatBadge(label: String, value: String, color: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            value,
-            style = MaterialTheme.typography.titleSmall,
-            color = color
-        )
-        Text(
-            label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-/** 月度日历网格（周日起始），每天按完成习惯数着色，今日加边框 */
 @Composable
 private fun MonthCalendar(cells: List<MonthCell>, activeHabits: Int) {
     val weekdayLabels = listOf("日", "一", "二", "三", "四", "五", "六")

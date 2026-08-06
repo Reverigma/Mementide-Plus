@@ -51,6 +51,7 @@ import com.reverigma.mementideplus.ui.components.PosterDialog
 import com.reverigma.mementideplus.util.AchievementCardGenerator
 import com.reverigma.mementideplus.util.AchievementShare
 import com.reverigma.mementideplus.util.DateUtils
+import com.reverigma.mementideplus.util.ImageStore
 import com.reverigma.mementideplus.util.LunarCalendar
 import com.reverigma.mementideplus.util.rememberMaterialIconBitmap
 
@@ -101,8 +102,8 @@ fun AnniversaryScreen(
         AddAnniversaryDialog(
             initial = toEdit,
             onDismiss = { toEdit = null },
-            onConfirm = { n, ic, c, d, r, nt, ct ->
-                viewModel.update(toEdit!!, n, ic, c, d, r, nt, ct)
+            onConfirm = { n, ic, c, d, r, nt, ct, img ->
+                viewModel.update(toEdit!!, n, ic, c, d, r, nt, ct, img)
                 toEdit = null
             }
         )
@@ -131,11 +132,13 @@ fun AnniversaryScreen(
             tint = Color.White
         )
         val bmp = remember(p.anniversary.id, p.countdownDays) {
+            val bg = p.anniversary.imagePath.ifBlank { null }?.let { ImageStore.decodeScaled(it) }
             AchievementCardGenerator.generateAnniversary(
                 p.anniversary,
                 p.countdownDays,
                 AchievementCardGenerator.anniversaryDateLabel(p.anniversary),
-                iconBmp
+                iconBmp,
+                bg
             )
         }
         val ctx = LocalContext.current

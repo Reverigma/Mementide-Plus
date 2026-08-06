@@ -64,6 +64,7 @@ import com.reverigma.mementideplus.ui.home.dialogs.BackfillDateDialog
 import com.reverigma.mementideplus.util.AchievementCardGenerator
 import com.reverigma.mementideplus.util.AchievementShare
 import com.reverigma.mementideplus.util.DateUtils
+import com.reverigma.mementideplus.util.ImageStore
 import com.reverigma.mementideplus.util.rememberMaterialIconBitmap
 
 @Composable
@@ -132,8 +133,8 @@ fun HomeScreen(
         AddHabitDialog(
             initial = habitToEdit,
             onDismiss = { habitToEdit = null },
-            onConfirm = { name, iconName, color, target ->
-                viewModel.updateHabit(habitToEdit!!, name, iconName, color, target)
+            onConfirm = { name, iconName, color, target, imagePath ->
+                viewModel.updateHabit(habitToEdit!!, name, iconName, color, target, imagePath)
                 habitToEdit = null
             }
         )
@@ -173,12 +174,14 @@ fun HomeScreen(
             tint = Color.White
         )
         val bmp = remember(posterItem.habit.id, posterItem.doneToday, posterItem.streak) {
+            val bg = posterItem.habit.imagePath.ifBlank { null }?.let { ImageStore.decodeScaled(it) }
             AchievementCardGenerator.generate(
                 posterItem.habit,
                 posterItem.streak,
                 posterItem.totalDone,
                 posterItem.thisWeekDone,
-                iconBmp
+                iconBmp,
+                bg
             )
         }
         val ctx = LocalContext.current
@@ -308,9 +311,7 @@ private fun HabitCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = tint.copy(alpha = if (item.doneToday) 0.10f else 0.06f)
-        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(

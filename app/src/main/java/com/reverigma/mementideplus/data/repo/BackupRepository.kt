@@ -42,6 +42,7 @@ class BackupRepository @Inject constructor(
                 put("name", h.name)
                 put("emoji", h.emoji)
                 put("iconName", h.iconName)
+                put("imagePath", h.imagePath)
                 put("colorInt", h.colorInt)
                 put("targetPerWeek", h.targetPerWeek)
                 put("createdAt", h.createdAt)
@@ -66,6 +67,7 @@ class BackupRepository @Inject constructor(
                 put("name", a.name)
                 put("emoji", a.emoji)
                 put("iconName", a.iconName)
+                put("imagePath", a.imagePath)
                 put("colorInt", a.colorInt)
                 put("date", a.date)
                 put("repeatType", a.repeatType)
@@ -92,6 +94,7 @@ class BackupRepository @Inject constructor(
                     name = o.getString("name"),
                     emoji = o.optString("emoji", "✅"),
                     iconName = o.optString("iconName", ""),
+                    imagePath = o.optString("imagePath", ""),
                     colorInt = o.optInt("colorInt", 0xFF4F46E5.toInt()),
                     targetPerWeek = o.optInt("targetPerWeek", 7),
                     createdAt = o.optLong("createdAt", System.currentTimeMillis())
@@ -122,6 +125,7 @@ class BackupRepository @Inject constructor(
                     name = o.getString("name"),
                     emoji = o.optString("emoji", "🎉"),
                     iconName = o.optString("iconName", ""),
+                    imagePath = o.optString("imagePath", ""),
                     colorInt = o.optInt("colorInt", 0xFFE11D48.toInt()),
                     date = o.getString("date"),
                     repeatType = o.optString("repeatType", REPEAT_YEARLY),

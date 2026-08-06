@@ -92,7 +92,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun addHabit(name: String, iconName: String, colorInt: Int, targetPerWeek: Int) {
+    fun addHabit(name: String, iconName: String, colorInt: Int, targetPerWeek: Int, imagePath: String = "") {
         viewModelScope.launch {
             val all = repo.habits().first()
             val nextOrder = (all.maxOfOrNull { it.sortOrder } ?: -1) + 1
@@ -102,6 +102,7 @@ class HomeViewModel @Inject constructor(
                     name = name,
                     emoji = "",
                     iconName = iconName,
+                    imagePath = imagePath,
                     colorInt = colorInt,
                     targetPerWeek = targetPerWeek,
                     sortOrder = nextOrder
@@ -152,13 +153,14 @@ class HomeViewModel @Inject constructor(
     }
 
     /** 编辑习惯：保留 id 与打卡记录，仅更新展示属性 */
-    fun updateHabit(habit: Habit, name: String, iconName: String, colorInt: Int, targetPerWeek: Int) {
+    fun updateHabit(habit: Habit, name: String, iconName: String, colorInt: Int, targetPerWeek: Int, imagePath: String = "") {
         viewModelScope.launch {
             repo.updateHabit(
                 habit.copy(
                     name = name,
                     emoji = "",
                     iconName = iconName,
+                    imagePath = imagePath,
                     colorInt = colorInt,
                     targetPerWeek = targetPerWeek
                 )

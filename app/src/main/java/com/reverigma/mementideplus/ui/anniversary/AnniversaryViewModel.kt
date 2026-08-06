@@ -55,7 +55,7 @@ class AnniversaryViewModel @Inject constructor(
         }
     }
 
-    fun add(name: String, iconName: String, colorInt: Int, date: String, repeatType: String, note: String, calendarType: String) {
+    fun add(name: String, iconName: String, colorInt: Int, date: String, repeatType: String, note: String, calendarType: String, imagePath: String = "") {
         viewModelScope.launch {
             repo.add(
                 Anniversary(
@@ -63,6 +63,7 @@ class AnniversaryViewModel @Inject constructor(
                     name = name,
                     emoji = "",
                     iconName = iconName,
+                    imagePath = imagePath,
                     colorInt = colorInt,
                     date = date,
                     repeatType = repeatType,
@@ -75,13 +76,14 @@ class AnniversaryViewModel @Inject constructor(
     }
 
     /** 编辑纪念日：保留 id，仅更新展示属性 */
-    fun update(a: Anniversary, name: String, iconName: String, colorInt: Int, date: String, repeatType: String, note: String, calendarType: String) {
+    fun update(a: Anniversary, name: String, iconName: String, colorInt: Int, date: String, repeatType: String, note: String, calendarType: String, imagePath: String = "") {
         viewModelScope.launch {
             repo.update(
                 a.copy(
                     name = name,
                     emoji = "",
                     iconName = iconName,
+                    imagePath = imagePath,
                     colorInt = colorInt,
                     date = date,
                     repeatType = repeatType,

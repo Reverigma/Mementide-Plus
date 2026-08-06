@@ -22,14 +22,20 @@ object AchievementCardGenerator {
     /**
      * 生成习惯成就海报。
      * @param iconBmp Material 图标位图（可选，null 时回退首字母）
+     * @param background 背景图（可选，习惯关联图片；cover 铺满 + 半透明白遮罩保证文字可读）
      */
-    fun generate(habit: Habit, streak: Int, totalDone: Int, thisWeekDone: Int, iconBmp: Bitmap? = null): Bitmap {
+    fun generate(
+        habit: Habit, streak: Int, totalDone: Int, thisWeekDone: Int,
+        iconBmp: Bitmap? = null,
+        background: Bitmap? = null
+    ): Bitmap {
         val tint = habit.colorInt
         val bitmap = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        // 背景：白色
+        // 背景：白色（无背景图时）
         canvas.drawColor(Color.WHITE)
+        drawBackground(canvas, background)
 
         // 顶部色带（习惯色半透明渐变块）
         val bandPaint = Paint().apply {
@@ -112,19 +118,22 @@ object AchievementCardGenerator {
      * @param countdownDays 距下次纪念日的天数（>=0 还有N天；0=今天；<0 已过）
      * @param dateLabel 展示日期文本，如 "8月5日" 或 "农历八月初五"
      * @param iconBmp Material 图标位图（可选，null 时回退首字母）
+     * @param background 背景图（可选，纪念日关联图片；cover 铺满 + 半透明白遮罩保证文字可读）
      */
     fun generateAnniversary(
         anniversary: Anniversary,
         countdownDays: Long,
         dateLabel: String,
-        iconBmp: Bitmap? = null
+        iconBmp: Bitmap? = null,
+        background: Bitmap? = null
     ): Bitmap {
         val tint = anniversary.colorInt
         val bitmap = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        // 背景：白色
+        // 背景：白色（无背景图时）
         canvas.drawColor(Color.WHITE)
+        drawBackground(canvas, background)
 
         // 顶部色带（纪念日色半透明渐变块）
         val bandPaint = Paint().apply {
@@ -241,6 +250,29 @@ object AchievementCardGenerator {
         } else {
             DateUtils.formatDate(a.date)
         }
+    }
+
+    /** 海报背景图绘制：cover 铺满整卡 + 半透明白遮罩（保证文字可读） */
+    private fun drawBackground(canvas: Canvas, background: Bitmap?) {
+        if (background == null) return
+        val bw = background.width.toFloat()
+        val bh = background.height.toFloat()
+        if (bw <= 0 || bh <= 0) return
+        val scale = maxOf(W / bw, H / bh)
+        val sw = W / scale
+        val sh = H / scale
+        val src = android.graphics.Rect(
+            ((bw - sw) / 2f).toInt(), ((bh - sh) / 2f).toInt(),
+            ((bw + sw) / 2f).toInt(), ((bh + sh) / 2f).toInt()
+        )
+        canvas.drawBitmap(
+            background,
+            src,
+            RectF(0f, 0f, W.toFloat(), H.toFloat()),
+            Paint().apply { isAntiAlias = true }
+        )
+        // 80% 白遮罩：背景图隐约可见，文字清晰
+        canvas.drawColor(Color.argb(204, 255, 255, 255))
     }
 
     /** 海报图标绘制：习惯色圆形底 + Material 图标位图（或首字母兜底） */

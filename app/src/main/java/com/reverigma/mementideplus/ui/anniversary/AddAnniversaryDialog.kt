@@ -1,5 +1,7 @@
 package com.reverigma.mementideplus.ui.anniversary
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.reverigma.mementideplus.data.model.Anniversary
 import com.reverigma.mementideplus.data.model.CALENDAR_LUNAR
@@ -43,7 +46,9 @@ import com.reverigma.mementideplus.data.model.REPEAT_MONTHLY
 import com.reverigma.mementideplus.data.model.REPEAT_NONE
 import com.reverigma.mementideplus.data.model.REPEAT_YEARLY
 import com.reverigma.mementideplus.ui.components.IconPicker
+import com.reverigma.mementideplus.ui.home.ImagePickRow
 import com.reverigma.mementideplus.util.DateUtils
+import com.reverigma.mementideplus.util.ImageStore
 import com.reverigma.mementideplus.util.LunarCalendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,7 +56,7 @@ import com.reverigma.mementideplus.util.LunarCalendar
 fun AddAnniversaryDialog(
     initial: Anniversary? = null,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, iconName: String, colorInt: Int, date: String, repeat: String, note: String, calendarType: String) -> Unit
+    onConfirm: (name: String, iconName: String, colorInt: Int, date: String, repeat: String, note: String, calendarType: String, imagePath: String) -> Unit
 ) {
     var name by remember(initial?.id) { mutableStateOf(initial?.name ?: "") }
     var iconName by remember(initial?.id) { mutableStateOf(initial?.iconName?.takeIf { it.isNotBlank() } ?: "cake") }
@@ -60,10 +65,21 @@ fun AddAnniversaryDialog(
     var repeat by remember(initial?.id) { mutableStateOf(initial?.repeatType ?: REPEAT_YEARLY) }
     var note by remember(initial?.id) { mutableStateOf(initial?.note ?: "") }
     var calendarType by remember(initial?.id) { mutableStateOf(initial?.calendarType ?: CALENDAR_SOLAR) }
+    var imagePath by remember(initial?.id) { mutableStateOf(initial?.imagePath ?: "") }
     // 农历选择：月份 1-12、日 1-30
     var lunarMonth by remember(initial?.id) { mutableStateOf(initial?.date?.split("-")?.getOrNull(0)?.toIntOrNull() ?: 1) }
     var lunarDay by remember(initial?.id) { mutableStateOf(initial?.date?.split("-")?.getOrNull(1)?.toIntOrNull() ?: 1) }
     var showPicker by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            ImageStore.saveFromUri(context, uri, "anniversary_images")?.let { newPath ->
+                if (newPath != imagePath) ImageStore.deleteFile(imagePath)
+                imagePath = newPath
+            }
+        }
+    }
 
     val colors = listOf(
         0xFFE11D48, 0xFF4F46E5, 0xFF0EA5E9, 0xFF10B981,
@@ -191,6 +207,11 @@ fun AddAnniversaryDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+                ImagePickRow(
+                    imagePath = imagePath,
+                    onPick = { imagePicker.launch("image/*") },
+                    onRemove = { ImageStore.deleteFile(imagePath); imagePath = "" }
+                )
             }
         },
         confirmButton = {
@@ -202,7 +223,7 @@ fun AddAnniversaryDialog(
                     } else {
                         date
                     }
-                    onConfirm(name.trim(), iconName, color, finalDate, repeat, note.trim(), calendarType)
+                    onConfirm(name.trim(), iconName, color, finalDate, repeat, note.trim(), calendarType, imagePath)
                 }
             ) { Text(if (initial == null) "创建" else "保存") }
         },
