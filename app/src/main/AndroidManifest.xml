@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 注意：刻意不申请 INTERNET 权限，从系统层面保证数据不出本机（隐私优先原则） -->
+    <!-- 隐私优先：应用数据完全本地。INTERNET 权限仅用于「设置 → 检查更新」手动触发时查询 GitHub 最新版本，日常不联网。 -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 

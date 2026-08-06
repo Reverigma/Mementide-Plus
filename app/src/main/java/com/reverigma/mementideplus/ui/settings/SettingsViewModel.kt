@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.reverigma.mementideplus.data.repo.BackupRepository
 import com.reverigma.mementideplus.data.settings.AppSettings
+import com.reverigma.mementideplus.util.UpdateChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -75,9 +77,42 @@ class SettingsViewModel @Inject constructor(
     fun setStatsViewOrder(order: String) = appSettings.setStatsViewOrder(order)
     fun setPosterTap(enabled: Boolean) = appSettings.setPosterTap(enabled)
 
+    /** 检查更新状态：手动触发，不自动检查、不强制更新。 */
+    private val _updateState = MutableStateFlow<UpdateCheckState>(UpdateCheckState.Idle)
+    val updateState: StateFlow<UpdateCheckState> = _updateState
+
+    /** 手动检查更新（仅在点击「检查更新」时触发） */
+    fun checkForUpdates(currentVersion: String) {
+        if (_updateState.value is UpdateCheckState.Checking) return
+        viewModelScope.launch {
+            _updateState.value = UpdateCheckState.Checking
+            val latest = UpdateChecker.fetchLatestVersion()
+            _updateState.value = when {
+                latest == null -> UpdateCheckState.Error("网络或服务器异常，请稍后再试")
+                UpdateChecker.compareVersions(latest, currentVersion) > 0 ->
+                    UpdateCheckState.HasUpdate(latest)
+                else -> UpdateCheckState.UpToDate
+            }
+        }
+    }
+
+    /** 关闭更新提示（不强制，用户可稍后再说） */
+    fun dismissUpdate() {
+        _updateState.value = UpdateCheckState.Idle
+    }
+
     /** 导出全部数据为 JSON 字符串。 */
     suspend fun exportData(): String = backupRepo.exportJson()
 
     /** 从 JSON 导入并覆盖数据，返回导入的记录条数。 */
     suspend fun importData(json: String): Int = backupRepo.importJson(json)
+}
+
+/** 检查更新结果状态 */
+sealed class UpdateCheckState {
+    object Idle : UpdateCheckState()
+    object Checking : UpdateCheckState()
+    data class HasUpdate(val latestVersion: String) : UpdateCheckState()
+    object UpToDate : UpdateCheckState()
+    data class Error(val message: String) : UpdateCheckState()
 }

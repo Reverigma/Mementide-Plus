@@ -54,6 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.ContextCompat
+import android.content.Intent
+import com.reverigma.mementideplus.BuildConfig
 import com.reverigma.mementideplus.reminder.ReminderScheduler
 import com.reverigma.mementideplus.util.DateUtils
 import kotlinx.coroutines.launch
@@ -412,6 +414,47 @@ fun SettingsScreen(
                 }
             }
 
+            // 检查更新
+            val updateState by viewModel.updateState.collectAsState()
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("检查更新", style = MaterialTheme.typography.titleMedium)
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                "手动点击检查 GitHub 最新版本，发现新版本仅提示、不强制更新。不会自动检查。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        TextButton(
+                            enabled = updateState !is UpdateCheckState.Checking,
+                            onClick = {
+                                viewModel.checkForUpdates(BuildConfig.VERSION_NAME)
+                            }
+                        ) {
+                            Text(
+                                if (updateState is UpdateCheckState.Checking) "检查中…" else "检查"
+                            )
+                        }
+                    }
+                    if (updateState is UpdateCheckState.Error) {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            (updateState as UpdateCheckState.Error).message,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+
             // 数据备份
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -498,5 +541,45 @@ fun SettingsScreen(
                 showSetPin = false
             }
         )
+    }
+
+    // 检查更新结果对话框（仅提示，不强制）
+    when (val us = viewModel.updateState.collectAsState().value) {
+        is UpdateCheckState.HasUpdate -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissUpdate() },
+                title = { Text("发现新版本") },
+                text = {
+                    Text(
+                        "Mementide Plus 有新版本 ${us.latestVersion}（当前 ${BuildConfig.VERSION_NAME}）。\n\n是否前往 GitHub 下载？不强制更新，可稍后再决定。"
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                android.net.Uri.parse("https://github.com/Reverigma/Mementide-Plus/releases/latest")
+                            )
+                        )
+                        viewModel.dismissUpdate()
+                    }) { Text("去下载") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.dismissUpdate() }) { Text("稍后再说") }
+                }
+            )
+        }
+        is UpdateCheckState.UpToDate -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissUpdate() },
+                title = { Text("已是最新版本") },
+                text = { Text("当前已是最新版本 ${BuildConfig.VERSION_NAME} 🎉") },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.dismissUpdate() }) { Text("好的") }
+                }
+            )
+        }
+        else -> {}
     }
 }
