@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Habit
+import com.reverigma.mementideplus.ui.components.HabitIcon
 import com.reverigma.mementideplus.ui.components.PosterDialog
 import com.reverigma.mementideplus.ui.home.dialogs.BackfillDateDialog
 import com.reverigma.mementideplus.util.AchievementCardGenerator
@@ -130,8 +131,8 @@ fun HomeScreen(
         AddHabitDialog(
             initial = habitToEdit,
             onDismiss = { habitToEdit = null },
-            onConfirm = { name, emoji, color, target ->
-                viewModel.updateHabit(habitToEdit!!, name, emoji, color, target)
+            onConfirm = { name, emoji, iconName, color, target ->
+                viewModel.updateHabit(habitToEdit!!, name, emoji, iconName, color, target)
                 habitToEdit = null
             }
         )
@@ -321,7 +322,13 @@ private fun HabitCard(
                     )
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(h.emoji, fontSize = 22.sp)
+                    HabitIcon(
+                        iconName = h.iconName,
+                        emoji = h.emoji,
+                        tint = tint,
+                        fontSize = 22,
+                        iconSize = 22
+                    )
                 }
             }
             Spacer(Modifier.width(14.dp))

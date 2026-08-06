@@ -13,7 +13,7 @@ import com.reverigma.mementideplus.data.model.HabitRecord
 
 @Database(
     entities = [Habit::class, HabitRecord::class, Anniversary::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -28,6 +28,14 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE habits ADD COLUMN sortOrder INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE habit_records ADD COLUMN timestamp INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE anniversaries ADD COLUMN calendarType TEXT NOT NULL DEFAULT 'solar'")
+            }
+        }
+
+        /** v4 -> v5：habits / anniversaries 加 iconName（空=emoji，非空=Material Icon 名） */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE habits ADD COLUMN iconName TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE anniversaries ADD COLUMN iconName TEXT NOT NULL DEFAULT ''")
             }
         }
     }

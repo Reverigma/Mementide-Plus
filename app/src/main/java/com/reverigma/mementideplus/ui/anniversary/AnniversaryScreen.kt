@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Anniversary
+import com.reverigma.mementideplus.ui.components.HabitIcon
 import com.reverigma.mementideplus.ui.components.PosterDialog
 import com.reverigma.mementideplus.util.AchievementCardGenerator
 import com.reverigma.mementideplus.util.AchievementShare
@@ -99,8 +100,8 @@ fun AnniversaryScreen(
         AddAnniversaryDialog(
             initial = toEdit,
             onDismiss = { toEdit = null },
-            onConfirm = { n, e, c, d, r, nt, ct ->
-                viewModel.update(toEdit!!, n, e, c, d, r, nt, ct)
+            onConfirm = { n, e, ic, c, d, r, nt, ct ->
+                viewModel.update(toEdit!!, n, e, ic, c, d, r, nt, ct)
                 toEdit = null
             }
         )
@@ -228,7 +229,13 @@ private fun AnniversaryCard(
                     )
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(a.emoji, fontSize = 22.sp)
+                    HabitIcon(
+                        iconName = a.iconName,
+                        emoji = a.emoji,
+                        tint = tint,
+                        fontSize = 22,
+                        iconSize = 22
+                    )
                 }
             }
             Spacer(Modifier.width(14.dp))

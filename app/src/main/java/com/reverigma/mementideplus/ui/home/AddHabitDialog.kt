@@ -28,23 +28,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.reverigma.mementideplus.data.model.Habit
+import com.reverigma.mementideplus.ui.components.IconPicker
+import com.reverigma.mementideplus.util.IconCatalog
 
 @Composable
 fun AddHabitDialog(
     initial: Habit? = null,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, emoji: String, color: Int, target: Int) -> Unit
+    onConfirm: (name: String, emoji: String, iconName: String, color: Int, target: Int) -> Unit
 ) {
     var name by remember(initial?.id) { mutableStateOf(initial?.name ?: "") }
     var emoji by remember(initial?.id) { mutableStateOf(initial?.emoji ?: "✅") }
+    var iconName by remember(initial?.id) { mutableStateOf(initial?.iconName ?: "") }
     var color by remember(initial?.id) { mutableStateOf(initial?.colorInt ?: 0xFF4F46E5.toInt()) }
     var target by remember(initial?.id) { mutableStateOf(initial?.targetPerWeek ?: 7) }
 
-    val emojis = listOf("✅", "💧", "🏃", "📚", "🧘", "🥗", "😴", "🎯", "💪", "🎨", "🌱", "🎵")
     val colors = listOf(
         0xFF4F46E5, 0xFF0EA5E9, 0xFF10B981, 0xFFF59E0B,
         0xFFEF4444, 0xFF8B5CF6, 0xFFEC4899, 0xFF14B8A6
@@ -63,15 +66,12 @@ fun AddHabitDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text("图标", style = MaterialTheme.typography.labelMedium)
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(emojis) { e ->
-                        FilterChip(
-                            selected = emoji == e,
-                            onClick = { emoji = e },
-                            label = { Text(e) }
-                        )
-                    }
-                }
+                IconPicker(
+                    selectedIconName = iconName,
+                    selectedEmoji = emoji,
+                    onIconSelected = { iconName = it; emoji = "" },
+                    onEmojiSelected = { emoji = it; iconName = "" }
+                )
                 Text("颜色", style = MaterialTheme.typography.labelMedium)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(colors) { c ->
@@ -111,7 +111,10 @@ fun AddHabitDialog(
         confirmButton = {
             TextButton(
                 enabled = name.isNotBlank(),
-                onClick = { onConfirm(name.trim(), emoji, color, target) }
+                onClick = {
+                    // icon 模式时 emoji 为空字符串，界面显示时按 iconName 渲染
+                    onConfirm(name.trim(), emoji, iconName, color, target)
+                }
             ) { Text(if (initial == null) "创建" else "保存") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } }

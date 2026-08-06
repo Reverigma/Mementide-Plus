@@ -36,13 +36,17 @@ object AchievementCardGenerator {
         val accentPaint = Paint().apply { color = tint }
         canvas.drawRoundRect(RectF(0f, 410f, W.toFloat(), 420f), 0f, 0f, accentPaint)
 
-        // Emoji（大）
-        val emojiPaint = Paint().apply {
-            textSize = 220f
-            textAlign = Paint.Align.CENTER
-            typeface = Typeface.create("sans-serif", Typeface.NORMAL)
+        // Emoji（大）；icon 模式画圆形 + 首字母代替
+        if (habit.iconName.isBlank()) {
+            val emojiPaint = Paint().apply {
+                textSize = 220f
+                textAlign = Paint.Align.CENTER
+                typeface = Typeface.create("sans-serif", Typeface.NORMAL)
+            }
+            canvas.drawText(habit.emoji, W / 2f, 300f, emojiPaint)
+        } else {
+            drawIconFallback(canvas, tint, habit.iconName, 300f)
         }
-        canvas.drawText(habit.emoji, W / 2f, 300f, emojiPaint)
 
         // 习惯名
         val namePaint = Paint().apply {
@@ -134,13 +138,17 @@ object AchievementCardGenerator {
         val accentPaint = Paint().apply { color = tint }
         canvas.drawRoundRect(RectF(0f, 410f, W.toFloat(), 420f), 0f, 0f, accentPaint)
 
-        // Emoji（大）
-        val emojiPaint = Paint().apply {
-            textSize = 220f
-            textAlign = Paint.Align.CENTER
-            typeface = Typeface.create("sans-serif", Typeface.NORMAL)
+        // Emoji（大）；icon 模式画圆形 + 首字母代替
+        if (anniversary.iconName.isBlank()) {
+            val emojiPaint = Paint().apply {
+                textSize = 220f
+                textAlign = Paint.Align.CENTER
+                typeface = Typeface.create("sans-serif", Typeface.NORMAL)
+            }
+            canvas.drawText(anniversary.emoji, W / 2f, 300f, emojiPaint)
+        } else {
+            drawIconFallback(canvas, tint, anniversary.iconName, 300f)
         }
-        canvas.drawText(anniversary.emoji, W / 2f, 300f, emojiPaint)
 
         // 纪念日名
         val namePaint = Paint().apply {
@@ -245,5 +253,26 @@ object AchievementCardGenerator {
         } else {
             DateUtils.formatDate(a.date)
         }
+    }
+
+    /** 海报上 Material Icon 的替代绘制：习惯色圆 + 白色首字符（icon 名首字母大写） */
+    private fun drawIconFallback(canvas: Canvas, tint: Int, iconName: String, baselineY: Float) {
+        val cx = W / 2f
+        val cy = baselineY - 120f
+        val r = 140f
+        val circlePaint = Paint().apply {
+            color = tint
+            isAntiAlias = true
+        }
+        canvas.drawCircle(cx, cy, r, circlePaint)
+        val letterPaint = Paint().apply {
+            textSize = 160f
+            textAlign = Paint.Align.CENTER
+            color = Color.WHITE
+            typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
+            isAntiAlias = true
+        }
+        val letter = iconName.take(1).uppercase()
+        canvas.drawText(letter, cx, cy + 56f, letterPaint)
     }
 }

@@ -156,8 +156,8 @@ class MainActivity : ComponentActivity() {
                 if (showAddHabit) {
                     AddHabitDialog(
                         onDismiss = { showAddHabit = false },
-                        onConfirm = { n, e, c, t ->
-                            homeVm.addHabit(n, e, c, t)
+                        onConfirm = { n, e, ic, c, t ->
+                            homeVm.addHabit(n, e, ic, c, t)
                             showAddHabit = false
                         }
                     )
@@ -165,8 +165,8 @@ class MainActivity : ComponentActivity() {
                 if (showAddAnni) {
                     AddAnniversaryDialog(
                         onDismiss = { showAddAnni = false },
-                        onConfirm = { n, e, c, d, r, nt, ct ->
-                            anniVm.add(n, e, c, d, r, nt, ct)
+                        onConfirm = { n, e, ic, c, d, r, nt, ct ->
+                            anniVm.add(n, e, ic, c, d, r, nt, ct)
                             showAddAnni = false
                         }
                     )

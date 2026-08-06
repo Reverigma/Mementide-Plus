@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.collectAsState
 import com.reverigma.mementideplus.data.model.Habit
+import com.reverigma.mementideplus.ui.components.HabitIcon
 import com.reverigma.mementideplus.util.DateUtils
 
 @Composable
@@ -385,7 +386,13 @@ private fun HabitStatCard(hs: HabitStat) {
                 modifier = Modifier.size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(h.emoji, fontSize = 22.sp)
+                    HabitIcon(
+                        iconName = h.iconName,
+                        emoji = h.emoji,
+                        tint = tint,
+                        fontSize = 22,
+                        iconSize = 22
+                    )
                 }
             }
             Spacer(Modifier.width(14.dp))
