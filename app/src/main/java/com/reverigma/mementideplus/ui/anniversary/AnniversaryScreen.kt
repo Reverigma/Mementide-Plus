@@ -145,7 +145,7 @@ fun AnniversaryScreen(
         PosterDialog(
             bitmap = bmp,
             onShare = {
-                AchievementShare.shareAnniversary(ctx, p.anniversary, p.countdownDays)
+                AchievementShare.shareAnniversary(ctx, p.anniversary, p.countdownDays, iconBmp)
                 posterItem = null
             },
             onDismiss = { posterItem = null }

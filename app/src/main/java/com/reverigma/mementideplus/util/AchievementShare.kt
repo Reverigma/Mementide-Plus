@@ -22,11 +22,17 @@ object AchievementShare {
     }
 
     /** 分享纪念日海报 */
-    fun shareAnniversary(context: Context, anniversary: com.reverigma.mementideplus.data.model.Anniversary, countdownDays: Long) {
+    fun shareAnniversary(
+        context: Context,
+        anniversary: com.reverigma.mementideplus.data.model.Anniversary,
+        countdownDays: Long,
+        iconBmp: android.graphics.Bitmap? = null
+    ) {
         val bmp = AchievementCardGenerator.generateAnniversary(
             anniversary,
             countdownDays,
-            AchievementCardGenerator.anniversaryDateLabel(anniversary)
+            AchievementCardGenerator.anniversaryDateLabel(anniversary),
+            iconBmp
         )
         val text = when {
             countdownDays > 0 -> "距离 ${anniversary.name} 还有 $countdownDays 天"

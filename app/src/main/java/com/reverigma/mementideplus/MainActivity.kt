@@ -8,6 +8,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -170,10 +171,12 @@ class MainActivity : ComponentActivity() {
                         if (selected != 2 && selected != 3) {
                             FloatingActionButton(
                                 onClick = { if (selected == 0) showAddHabit = true else showAddAnni = true },
-                                shape = FloatingActionButtonDefaults.shape,
+                                shape = RoundedCornerShape(18.dp),
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
                                 elevation = FloatingActionButtonDefaults.elevation(
-                                    defaultElevation = 2.dp,
-                                    pressedElevation = 4.dp
+                                    defaultElevation = 0.dp,
+                                    pressedElevation = 2.dp
                                 )
                             ) {
                                 Icon(Icons.Filled.Add, "添加")
