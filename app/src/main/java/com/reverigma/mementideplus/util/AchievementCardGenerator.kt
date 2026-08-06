@@ -108,7 +108,7 @@ object AchievementCardGenerator {
             color = Color.parseColor("#D1D5DB")
             typeface = Typeface.create("sans-serif", Typeface.NORMAL)
         }
-        canvas.drawText("Mementide Plus · 时光记忆", W / 2f, 1400f, watermarkPaint)
+        canvas.drawText("Mementide Plus", W / 2f, 1400f, watermarkPaint)
 
         return bitmap
     }
@@ -228,7 +228,7 @@ object AchievementCardGenerator {
             color = Color.parseColor("#D1D5DB")
             typeface = Typeface.create("sans-serif", Typeface.NORMAL)
         }
-        canvas.drawText("Mementide Plus · 时光记忆", W / 2f, 1400f, watermarkPaint)
+        canvas.drawText("Mementide Plus", W / 2f, 1400f, watermarkPaint)
 
         return bitmap
     }
