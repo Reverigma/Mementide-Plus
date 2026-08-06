@@ -468,7 +468,7 @@ fun SettingsScreen(
                         FilterChip(
                             selected = updateSource == "gitee",
                             onClick = { viewModel.setUpdateSource("gitee") },
-                            label = { Text("Gitee（推荐）") },
+                            label = { Text("Gitee") },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -485,12 +485,6 @@ fun SettingsScreen(
                             )
                         )
                     }
-                    Text(
-                        "Gitee 在国内访问更快，默认使用；GitHub 更新更及时。切换后下次检查更新即生效。",
-                        modifier = Modifier.padding(top = 6.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                     if (updateState is UpdateCheckState.Error) {
                         Spacer(Modifier.height(10.dp))
                         Text(
