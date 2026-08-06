@@ -9,28 +9,44 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * 检查更新工具：查询 GitHub Releases 最新版本，与本地版本比对；支持应用内直接下载 APK。
+ * 检查更新工具：查询最新版本与 APK 下载地址，支持 Gitee / GitHub 双更新源。
  * 仅由「设置 → 检查更新」手动触发，不自动检查、不强制更新。
  */
 object UpdateChecker {
 
-    /** 仓库最新 release 的 API 地址（免鉴权，公开仓库可读） */
-    private const val RELEASES_URL = "https://api.github.com/repos/Reverigma/Mementide-Plus/releases/latest"
+    /** 更新源标识 */
+    const val SOURCE_GITEE = "gitee"
+    const val SOURCE_GITHUB = "github"
+
+    private const val OWNER = "Reverigma"
+    private const val REPO = "Mementide-Plus"
+
+    /** 各源最新 release API（公开仓库免鉴权） */
+    private fun latestApiUrl(source: String): String = when (source) {
+        SOURCE_GITEE -> "https://gitee.com/api/v5/repos/$OWNER/$REPO/releases/latest"
+        else -> "https://api.github.com/repos/$OWNER/$REPO/releases/latest"
+    }
+
+    /** 各源 APK 直链前缀：releases/download/{tag}/MementidePlus-{tag}.apk（命名固定，可离线拼） */
+    private fun downloadBase(source: String): String = when (source) {
+        SOURCE_GITEE -> "https://gitee.com/$OWNER/$REPO/releases/download"
+        else -> "https://github.com/$OWNER/$REPO/releases/download"
+    }
 
     /** 最新版本信息 */
-    data class LatestRelease(val version: String, val apkUrl: String)
+    data class LatestRelease(val version: String, val apkUrl: String, val source: String)
 
     /**
      * 查询远端最新版本号与 APK 下载地址，失败返回 null。
      * 在 IO 线程执行网络请求。
      */
-    suspend fun fetchLatestRelease(): LatestRelease? = withContext(Dispatchers.IO) {
+    suspend fun fetchLatestRelease(source: String): LatestRelease? = withContext(Dispatchers.IO) {
         try {
-            val conn = URL(RELEASES_URL).openConnection() as HttpURLConnection
+            val conn = URL(latestApiUrl(source)).openConnection() as HttpURLConnection
             conn.requestMethod = "GET"
             conn.connectTimeout = 8000
             conn.readTimeout = 8000
-            conn.setRequestProperty("Accept", "application/vnd.github+json")
+            conn.setRequestProperty("Accept", "application/json")
             conn.setRequestProperty("User-Agent", "MementidePlus")
             try {
                 if (conn.responseCode != 200) {
@@ -39,16 +55,23 @@ object UpdateChecker {
                     val body = conn.inputStream.bufferedReader().use { it.readText() }
                     val json = JSONObject(body)
                     val tag = json.optString("tag_name").takeIf { it.isNotBlank() } ?: return@withContext null
-                    // 优先取 assets 里的 APK 下载地址（发布时统一命名为 MementidePlus-vX.Y.Z.apk）
+                    // 优先取 assets 里的 APK 下载地址（Gitee 资产含源码 zip，需过滤 .apk）
                     var apkUrl = ""
                     val assets = json.optJSONArray("assets")
-                    if (assets != null && assets.length() > 0) {
-                        apkUrl = assets.getJSONObject(0).optString("browser_download_url", "")
+                    if (assets != null) {
+                        for (i in 0 until assets.length()) {
+                            val name = assets.getJSONObject(i).optString("name", "")
+                            if (name.endsWith(".apk")) {
+                                apkUrl = assets.getJSONObject(i).optString("browser_download_url", "")
+                                break
+                            }
+                        }
                     }
+                    // 兜底：APK 命名固定为 MementidePlus-{tag}.apk，直链可离线拼
                     if (apkUrl.isBlank()) {
-                        apkUrl = "https://github.com/Reverigma/Mementide-Plus/releases/download/$tag/MementidePlus-$tag.apk"
+                        apkUrl = "${downloadBase(source)}/$tag/MementidePlus-$tag.apk"
                     }
-                    LatestRelease(tag, apkUrl)
+                    LatestRelease(tag, apkUrl, source)
                 }
             } finally {
                 conn.disconnect()

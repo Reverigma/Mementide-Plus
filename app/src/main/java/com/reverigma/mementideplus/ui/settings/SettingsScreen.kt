@@ -82,6 +82,7 @@ fun SettingsScreen(
     val statsHeatmap by viewModel.statsHeatmap.collectAsState()
     val statsViewOrder by viewModel.statsViewOrder.collectAsState()
     val posterTap by viewModel.posterTap.collectAsState()
+    val updateSource by viewModel.updateSource.collectAsState()
     var showSetPin by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf<String?>(null) }
@@ -455,6 +456,41 @@ fun SettingsScreen(
                             )
                         }
                     }
+                    Spacer(Modifier.height(12.dp))
+                    // 更新源切换
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "更新源",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        FilterChip(
+                            selected = updateSource == "gitee",
+                            onClick = { viewModel.setUpdateSource("gitee") },
+                            label = { Text("Gitee（推荐）") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        FilterChip(
+                            selected = updateSource == "github",
+                            onClick = { viewModel.setUpdateSource("github") },
+                            label = { Text("GitHub") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        )
+                    }
+                    Text(
+                        "Gitee 在国内访问更快，默认使用；GitHub 更新更及时。切换后下次检查更新即生效。",
+                        modifier = Modifier.padding(top = 6.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     if (updateState is UpdateCheckState.Error) {
                         Spacer(Modifier.height(10.dp))
                         Text(

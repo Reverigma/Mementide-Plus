@@ -58,6 +58,10 @@ class AppSettings @Inject constructor(
     private val _posterTap = MutableStateFlow(prefs.getBoolean(KEY_POSTER_TAP, true))
     val posterTap: StateFlow<Boolean> = _posterTap.asStateFlow()
 
+    /** 更新源："gitee" 或 "github"，默认 gitee（中国境内访问更快） */
+    private val _updateSource = MutableStateFlow(prefs.getString(KEY_UPDATE_SOURCE, "gitee") ?: "gitee")
+    val updateSource: StateFlow<String> = _updateSource.asStateFlow()
+
     fun setAdvancedMode(enabled: Boolean) {
         prefs.edit { putBoolean(KEY_ADVANCED, enabled) }
         _advancedMode.value = enabled
@@ -81,6 +85,11 @@ class AppSettings @Inject constructor(
     fun setStatsViewOrder(order: String) {
         prefs.edit { putString(KEY_STATS_ORDER, order) }
         _statsViewOrder.value = order
+    }
+
+    fun setUpdateSource(source: String) {
+        prefs.edit { putString(KEY_UPDATE_SOURCE, source) }
+        _updateSource.value = source
     }
 
     fun setReminderEnabled(enabled: Boolean) {
@@ -145,5 +154,6 @@ class AppSettings @Inject constructor(
         private const val KEY_STATS_HEATMAP = "stats_heatmap"
         private const val KEY_STATS_ORDER = "stats_view_order"
         private const val KEY_POSTER_TAP = "poster_tap"
+        private const val KEY_UPDATE_SOURCE = "update_source"
     }
 }

@@ -54,6 +54,9 @@ class SettingsViewModel @Inject constructor(
     /** 点击卡片 emoji 弹出海报预览。 */
     val posterTap: StateFlow<Boolean> = appSettings.posterTap
 
+    /** 更新源："gitee"（默认，境内访问快）或 "github"。 */
+    val updateSource: StateFlow<String> = appSettings.updateSource
+
     /** 本次运行中的「是否处于加锁态」——由后台返回逻辑控制。 */
     private val _isLocked = MutableStateFlow(false)
 
@@ -80,20 +83,22 @@ class SettingsViewModel @Inject constructor(
     fun setStatsHeatmap(enabled: Boolean) = appSettings.setStatsHeatmap(enabled)
     fun setStatsViewOrder(order: String) = appSettings.setStatsViewOrder(order)
     fun setPosterTap(enabled: Boolean) = appSettings.setPosterTap(enabled)
+    fun setUpdateSource(source: String) = appSettings.setUpdateSource(source)
 
     /** 检查更新状态：手动触发，不自动检查、不强制更新。 */
     private val _updateState = MutableStateFlow<UpdateCheckState>(UpdateCheckState.Idle)
     val updateState: StateFlow<UpdateCheckState> = _updateState
 
-    /** 手动检查更新（仅在点击「检查更新」时触发） */
+    /** 手动检查更新（仅在点击「检查更新」时触发，按当前设置的更新源查询） */
     fun checkForUpdates(currentVersion: String) {
         if (_updateState.value is UpdateCheckState.Checking) return
         if (_updateState.value is UpdateCheckState.Downloading) return
+        val source = appSettings.updateSource.value
         viewModelScope.launch {
             _updateState.value = UpdateCheckState.Checking
-            val latest = UpdateChecker.fetchLatestRelease()
+            val latest = UpdateChecker.fetchLatestRelease(source)
             _updateState.value = when {
-                latest == null -> UpdateCheckState.Error("网络或服务器异常，请稍后再试")
+                latest == null -> UpdateCheckState.Error("网络或服务器异常，请稍后再试（可尝试切换更新源）")
                 UpdateChecker.compareVersions(latest.version, currentVersion) > 0 ->
                     UpdateCheckState.HasUpdate(latest.version, latest.apkUrl)
                 else -> UpdateCheckState.UpToDate

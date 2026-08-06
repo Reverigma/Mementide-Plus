@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 隐私优先：应用数据完全本地。INTERNET 权限仅用于「设置 → 检查更新」手动触发时查询 GitHub 最新版本与下载 APK，日常不联网。 -->
+    <!-- 隐私优先：应用数据完全本地。INTERNET 权限仅用于「设置 → 检查更新」手动触发时查询 Gitee/GitHub 最新版本与下载 APK，日常不联网。 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- 应用内下载新版 APK 后唤起系统安装界面所需（Android 8+ 未知来源安装） -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
