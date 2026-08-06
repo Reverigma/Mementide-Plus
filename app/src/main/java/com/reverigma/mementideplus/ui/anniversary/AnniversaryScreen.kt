@@ -100,8 +100,8 @@ fun AnniversaryScreen(
         AddAnniversaryDialog(
             initial = toEdit,
             onDismiss = { toEdit = null },
-            onConfirm = { n, e, ic, c, d, r, nt, ct ->
-                viewModel.update(toEdit!!, n, e, ic, c, d, r, nt, ct)
+            onConfirm = { n, ic, c, d, r, nt, ct ->
+                viewModel.update(toEdit!!, n, ic, c, d, r, nt, ct)
                 toEdit = null
             }
         )
@@ -231,9 +231,7 @@ private fun AnniversaryCard(
                 Box(contentAlignment = Alignment.Center) {
                     HabitIcon(
                         iconName = a.iconName,
-                        emoji = a.emoji,
                         tint = tint,
-                        fontSize = 22,
                         iconSize = 22
                     )
                 }

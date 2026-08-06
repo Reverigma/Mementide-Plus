@@ -131,8 +131,8 @@ fun HomeScreen(
         AddHabitDialog(
             initial = habitToEdit,
             onDismiss = { habitToEdit = null },
-            onConfirm = { name, emoji, iconName, color, target ->
-                viewModel.updateHabit(habitToEdit!!, name, emoji, iconName, color, target)
+            onConfirm = { name, iconName, color, target ->
+                viewModel.updateHabit(habitToEdit!!, name, iconName, color, target)
                 habitToEdit = null
             }
         )
@@ -180,7 +180,7 @@ fun HomeScreen(
             onShare = {
                 AchievementShare.shareBitmap(
                     ctx, bmp,
-                    "我在 Mementide Plus 连续打卡 ${posterItem.streak} 天（${posterItem.habit.emoji} ${posterItem.habit.name}）💪"
+                    "我在 Mementide Plus 连续打卡 ${posterItem.streak} 天（${posterItem.habit.name}）💪"
                 )
                 habitPoster = null
             },
@@ -324,9 +324,7 @@ private fun HabitCard(
                 Box(contentAlignment = Alignment.Center) {
                     HabitIcon(
                         iconName = h.iconName,
-                        emoji = h.emoji,
                         tint = tint,
-                        fontSize = 22,
                         iconSize = 22
                     )
                 }

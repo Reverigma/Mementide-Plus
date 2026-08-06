@@ -18,7 +18,7 @@ object AchievementShare {
 
     fun share(context: Context, habit: Habit, streak: Int, totalDone: Int, thisWeekDone: Int) {
         val bmp = AchievementCardGenerator.generate(habit, streak, totalDone, thisWeekDone)
-        shareBitmap(context, bmp, "我在 Mementide Plus 连续打卡 $streak 天（${habit.emoji} ${habit.name}）💪")
+        shareBitmap(context, bmp, "我在 Mementide Plus 连续打卡 $streak 天（${habit.name}）💪")
     }
 
     /** 分享纪念日海报 */
@@ -29,9 +29,9 @@ object AchievementShare {
             AchievementCardGenerator.anniversaryDateLabel(anniversary)
         )
         val text = when {
-            countdownDays > 0 -> "距离 ${anniversary.emoji} ${anniversary.name} 还有 $countdownDays 天"
-            countdownDays == 0L -> "今天就是 ${anniversary.emoji} ${anniversary.name}！"
-            else -> "${anniversary.emoji} ${anniversary.name} 已过 ${-countdownDays} 天"
+            countdownDays > 0 -> "距离 ${anniversary.name} 还有 $countdownDays 天"
+            countdownDays == 0L -> "今天就是 ${anniversary.name}！"
+            else -> "${anniversary.name} 已过 ${-countdownDays} 天"
         }
         shareBitmap(context, bmp, text)
     }

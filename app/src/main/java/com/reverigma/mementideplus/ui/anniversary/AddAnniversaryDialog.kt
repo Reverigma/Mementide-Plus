@@ -51,11 +51,10 @@ import com.reverigma.mementideplus.util.LunarCalendar
 fun AddAnniversaryDialog(
     initial: Anniversary? = null,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, emoji: String, iconName: String, colorInt: Int, date: String, repeat: String, note: String, calendarType: String) -> Unit
+    onConfirm: (name: String, iconName: String, colorInt: Int, date: String, repeat: String, note: String, calendarType: String) -> Unit
 ) {
     var name by remember(initial?.id) { mutableStateOf(initial?.name ?: "") }
-    var emoji by remember(initial?.id) { mutableStateOf(initial?.emoji ?: "🎉") }
-    var iconName by remember(initial?.id) { mutableStateOf(initial?.iconName ?: "") }
+    var iconName by remember(initial?.id) { mutableStateOf(initial?.iconName?.takeIf { it.isNotBlank() } ?: "cake") }
     var color by remember(initial?.id) { mutableStateOf(initial?.colorInt ?: 0xFFE11D48.toInt()) }
     var date by remember(initial?.id) { mutableStateOf(initial?.date ?: DateUtils.todayStr()) }
     var repeat by remember(initial?.id) { mutableStateOf(initial?.repeatType ?: REPEAT_YEARLY) }
@@ -117,9 +116,7 @@ fun AddAnniversaryDialog(
                 Text("图标", style = MaterialTheme.typography.labelMedium)
                 IconPicker(
                     selectedIconName = iconName,
-                    selectedEmoji = emoji,
-                    onIconSelected = { iconName = it; emoji = "" },
-                    onEmojiSelected = { emoji = it; iconName = "" }
+                    onIconSelected = { iconName = it }
                 )
                 Text("颜色", style = MaterialTheme.typography.labelMedium)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -205,7 +202,7 @@ fun AddAnniversaryDialog(
                     } else {
                         date
                     }
-                    onConfirm(name.trim(), emoji, iconName, color, finalDate, repeat, note.trim(), calendarType)
+                    onConfirm(name.trim(), iconName, color, finalDate, repeat, note.trim(), calendarType)
                 }
             ) { Text(if (initial == null) "创建" else "保存") }
         },

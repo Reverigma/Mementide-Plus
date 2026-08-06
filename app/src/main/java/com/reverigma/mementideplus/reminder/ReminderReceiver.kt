@@ -67,7 +67,7 @@ class ReminderReceiver : BroadcastReceiver() {
                     AnniversaryCountdown.countdownDays(it, today) == 0L
                 }
                 if (todayAnniversaries.isNotEmpty()) {
-                    val names = todayAnniversaries.joinToString("、") { "${it.emoji} ${it.name}" }
+                    val names = todayAnniversaries.joinToString("、") { it.name }
                     notify(
                         app,
                         id = 101,

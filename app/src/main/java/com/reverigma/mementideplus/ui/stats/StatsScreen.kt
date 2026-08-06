@@ -388,9 +388,7 @@ private fun HabitStatCard(hs: HabitStat) {
                 Box(contentAlignment = Alignment.Center) {
                     HabitIcon(
                         iconName = h.iconName,
-                        emoji = h.emoji,
                         tint = tint,
-                        fontSize = 22,
                         iconSize = 22
                     )
                 }

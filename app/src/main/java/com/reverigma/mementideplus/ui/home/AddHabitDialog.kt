@@ -40,11 +40,10 @@ import com.reverigma.mementideplus.util.IconCatalog
 fun AddHabitDialog(
     initial: Habit? = null,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, emoji: String, iconName: String, color: Int, target: Int) -> Unit
+    onConfirm: (name: String, iconName: String, color: Int, target: Int) -> Unit
 ) {
     var name by remember(initial?.id) { mutableStateOf(initial?.name ?: "") }
-    var emoji by remember(initial?.id) { mutableStateOf(initial?.emoji ?: "✅") }
-    var iconName by remember(initial?.id) { mutableStateOf(initial?.iconName ?: "") }
+    var iconName by remember(initial?.id) { mutableStateOf(initial?.iconName?.takeIf { it.isNotBlank() } ?: "star") }
     var color by remember(initial?.id) { mutableStateOf(initial?.colorInt ?: 0xFF4F46E5.toInt()) }
     var target by remember(initial?.id) { mutableStateOf(initial?.targetPerWeek ?: 7) }
 
@@ -68,9 +67,7 @@ fun AddHabitDialog(
                 Text("图标", style = MaterialTheme.typography.labelMedium)
                 IconPicker(
                     selectedIconName = iconName,
-                    selectedEmoji = emoji,
-                    onIconSelected = { iconName = it; emoji = "" },
-                    onEmojiSelected = { emoji = it; iconName = "" }
+                    onIconSelected = { iconName = it }
                 )
                 Text("颜色", style = MaterialTheme.typography.labelMedium)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -112,8 +109,7 @@ fun AddHabitDialog(
             TextButton(
                 enabled = name.isNotBlank(),
                 onClick = {
-                    // icon 模式时 emoji 为空字符串，界面显示时按 iconName 渲染
-                    onConfirm(name.trim(), emoji, iconName, color, target)
+                    onConfirm(name.trim(), iconName, color, target)
                 }
             ) { Text(if (initial == null) "创建" else "保存") }
         },

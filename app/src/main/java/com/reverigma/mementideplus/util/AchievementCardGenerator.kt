@@ -36,17 +36,8 @@ object AchievementCardGenerator {
         val accentPaint = Paint().apply { color = tint }
         canvas.drawRoundRect(RectF(0f, 410f, W.toFloat(), 420f), 0f, 0f, accentPaint)
 
-        // Emoji（大）；icon 模式画圆形 + 首字母代替
-        if (habit.iconName.isBlank()) {
-            val emojiPaint = Paint().apply {
-                textSize = 220f
-                textAlign = Paint.Align.CENTER
-                typeface = Typeface.create("sans-serif", Typeface.NORMAL)
-            }
-            canvas.drawText(habit.emoji, W / 2f, 300f, emojiPaint)
-        } else {
-            drawIconFallback(canvas, tint, habit.iconName, 300f)
-        }
+        // 图标（大）：Material 图标以「习惯色圆 + 首字母」呈现
+        drawIconFallback(canvas, tint, habit.iconName.ifBlank { "star" }, 300f)
 
         // 习惯名
         val namePaint = Paint().apply {
@@ -138,17 +129,8 @@ object AchievementCardGenerator {
         val accentPaint = Paint().apply { color = tint }
         canvas.drawRoundRect(RectF(0f, 410f, W.toFloat(), 420f), 0f, 0f, accentPaint)
 
-        // Emoji（大）；icon 模式画圆形 + 首字母代替
-        if (anniversary.iconName.isBlank()) {
-            val emojiPaint = Paint().apply {
-                textSize = 220f
-                textAlign = Paint.Align.CENTER
-                typeface = Typeface.create("sans-serif", Typeface.NORMAL)
-            }
-            canvas.drawText(anniversary.emoji, W / 2f, 300f, emojiPaint)
-        } else {
-            drawIconFallback(canvas, tint, anniversary.iconName, 300f)
-        }
+        // 图标（大）：Material 图标以「纪念日色圆 + 首字母」呈现
+        drawIconFallback(canvas, tint, anniversary.iconName.ifBlank { "cake" }, 300f)
 
         // 纪念日名
         val namePaint = Paint().apply {

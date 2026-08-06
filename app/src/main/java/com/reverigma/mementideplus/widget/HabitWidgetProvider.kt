@@ -147,9 +147,8 @@ class HabitWidgetProvider : AppWidgetProvider() {
                     val h = undone[i]
                     views.setViewVisibility(itemId, android.view.View.VISIBLE)
                     views.setTextColor(dotId, h.colorInt)
-                    // widget 无法渲染 Material Icon，icon 模式用习惯色圆点代替 emoji 前缀
-                    val prefix = if (h.iconName.isBlank()) "${h.emoji} " else ""
-                    views.setTextViewText(textId, "$prefix${h.name}")
+                    // widget 无法渲染 Material Icon，用习惯色圆点代替
+                    views.setTextViewText(textId, h.name)
                     // 点击该项直接完成打卡
                     val toggleIntent = Intent(context, HabitWidgetProvider::class.java).apply {
                         action = ACTION_TOGGLE_HABIT
