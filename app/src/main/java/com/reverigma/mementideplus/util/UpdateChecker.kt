@@ -41,7 +41,7 @@ object UpdateChecker {
 
     /**
      * 查询远端最新版本号与 APK 下载地址，失败返回 null。
-     * Gitee 源：优先 API（浏览器 UA），失败兜底用网页重定向解析最新 tag。
+     * Gitee 源：API(浏览器UA) → 网页重定向 → 仓库根 latest.json(raw 静态直链)，逐级兜底。
      * 在 IO 线程执行网络请求。
      */
     suspend fun fetchLatestRelease(source: String): LatestRelease? = withContext(Dispatchers.IO) {
@@ -49,10 +49,33 @@ object UpdateChecker {
         if (fromApi != null) {
             fromApi
         } else if (source == SOURCE_GITEE) {
-            // Gitee 兜底：/releases/latest 网页 302 重定向到最新版本页，解析 tag
             queryLatestFromGiteeRedirect()
+                ?: queryLatestFromGiteeRaw()
         } else {
             null
+        }
+    }
+
+    /** Gitee 兜底②：仓库根目录 latest.json（raw 静态直链，不走 API/页面，风控最宽松） */
+    private fun queryLatestFromGiteeRaw(): LatestRelease? {
+        var conn: HttpURLConnection? = null
+        return try {
+            conn = URL("https://gitee.com/$OWNER/$REPO/raw/main/latest.json").openConnection() as HttpURLConnection
+            conn!!.requestMethod = "GET"
+            conn!!.connectTimeout = 8000
+            conn!!.readTimeout = 8000
+            conn!!.setRequestProperty("User-Agent", USER_AGENT)
+            if (conn!!.responseCode != 200) {
+                null
+            } else {
+                val body = conn!!.inputStream.bufferedReader().use { it.readText() }
+                val tag = JSONObject(body).optString("tag_name").takeIf { it.isNotBlank() } ?: return null
+                LatestRelease(tag, "${downloadBase(SOURCE_GITEE)}/$tag/MementidePlus-$tag.apk", SOURCE_GITEE)
+            }
+        } catch (_: Exception) {
+            null
+        } finally {
+            conn?.disconnect()
         }
     }
 
