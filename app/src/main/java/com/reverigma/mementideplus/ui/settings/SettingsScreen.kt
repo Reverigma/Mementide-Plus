@@ -32,6 +32,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -54,10 +55,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import android.content.Context
 import android.content.Intent
+import android.provider.Settings
 import com.reverigma.mementideplus.BuildConfig
 import com.reverigma.mementideplus.reminder.ReminderScheduler
 import com.reverigma.mementideplus.util.DateUtils
+import java.io.File
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -428,7 +433,7 @@ fun SettingsScreen(
                             Text("检查更新", style = MaterialTheme.typography.titleMedium)
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                "手动点击检查 GitHub 最新版本，发现新版本仅提示、不强制更新。不会自动检查。",
+                                "手动点击检查最新版本，发现新版可应用内直接下载安装，不强制更新。不会自动检查。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -543,7 +548,7 @@ fun SettingsScreen(
         )
     }
 
-    // 检查更新结果对话框（仅提示，不强制）
+    // 检查更新结果对话框（仅提示，不强制；下载与应用内完成）
     when (val us = viewModel.updateState.collectAsState().value) {
         is UpdateCheckState.HasUpdate -> {
             AlertDialog(
@@ -551,22 +556,64 @@ fun SettingsScreen(
                 title = { Text("发现新版本") },
                 text = {
                     Text(
-                        "Mementide Plus 有新版本 ${us.latestVersion}（当前 ${BuildConfig.VERSION_NAME}）。\n\n是否前往 GitHub 下载？不强制更新，可稍后再决定。"
+                        "Mementide Plus 有新版本 ${us.latestVersion}（当前 ${BuildConfig.VERSION_NAME}）。\n\n是否下载安装？不强制更新，可稍后再决定。"
                     )
                 },
                 confirmButton = {
-                    TextButton(onClick = {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                android.net.Uri.parse("https://github.com/Reverigma/Mementide-Plus/releases/latest")
-                            )
-                        )
-                        viewModel.dismissUpdate()
-                    }) { Text("去下载") }
+                    TextButton(onClick = { viewModel.startDownload() }) { Text("下载更新") }
                 },
                 dismissButton = {
                     TextButton(onClick = { viewModel.dismissUpdate() }) { Text("稍后再说") }
+                }
+            )
+        }
+        is UpdateCheckState.Downloading -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissUpdate() },
+                title = { Text("正在下载更新") },
+                text = {
+                    Column {
+                        LinearProgressIndicator(
+                            progress = { us.progress },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "已下载 ${(us.progress * 100).toInt()}%",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.dismissUpdate() }) { Text("后台下载") }
+                }
+            )
+        }
+        is UpdateCheckState.DownloadReady -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissUpdate() },
+                title = { Text("下载完成") },
+                text = { Text("新版本已下载完成，是否现在安装？") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        if (!context.packageManager.canRequestPackageInstalls()) {
+                            // 未授权「安装未知应用」，先引导去系统设置授权
+                            context.startActivity(
+                                Intent(
+                                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                                    android.net.Uri.parse("package:${context.packageName}")
+                                )
+                            )
+                            viewModel.dismissUpdate()
+                        } else {
+                            installDownloadedApk(context, us.filePath)
+                            viewModel.dismissUpdate()
+                        }
+                    }) { Text("安装") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.dismissUpdate() }) { Text("稍后") }
                 }
             )
         }
@@ -574,7 +621,7 @@ fun SettingsScreen(
             AlertDialog(
                 onDismissRequest = { viewModel.dismissUpdate() },
                 title = { Text("已是最新版本") },
-                text = { Text("当前已是最新版本 ${BuildConfig.VERSION_NAME} 🎉") },
+                text = { Text("当前已是最新版本 ${BuildConfig.VERSION_NAME}") },
                 confirmButton = {
                     TextButton(onClick = { viewModel.dismissUpdate() }) { Text("好的") }
                 }
@@ -582,4 +629,18 @@ fun SettingsScreen(
         }
         else -> {}
     }
+}
+
+/** 用 FileProvider 唤起系统安装界面（安装下载好的 APK） */
+private fun installDownloadedApk(context: Context, filePath: String) {
+    val uri = FileProvider.getUriForFile(
+        context,
+        "com.reverigma.mementideplus.fileprovider",
+        File(filePath)
+    )
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, "application/vnd.android.package-archive")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    context.startActivity(intent)
 }

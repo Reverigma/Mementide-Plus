@@ -1,23 +1,27 @@
 package com.reverigma.mementideplus.ui.settings
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.reverigma.mementideplus.data.repo.BackupRepository
 import com.reverigma.mementideplus.data.settings.AppSettings
 import com.reverigma.mementideplus.util.UpdateChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val appSettings: AppSettings,
-    private val backupRepo: BackupRepository
+    private val backupRepo: BackupRepository,
+    @ApplicationContext private val appContext: Context
 ) : ViewModel() {
 
     /** 应用锁总开关（来自持久化设置）。 */
@@ -84,14 +88,35 @@ class SettingsViewModel @Inject constructor(
     /** 手动检查更新（仅在点击「检查更新」时触发） */
     fun checkForUpdates(currentVersion: String) {
         if (_updateState.value is UpdateCheckState.Checking) return
+        if (_updateState.value is UpdateCheckState.Downloading) return
         viewModelScope.launch {
             _updateState.value = UpdateCheckState.Checking
-            val latest = UpdateChecker.fetchLatestVersion()
+            val latest = UpdateChecker.fetchLatestRelease()
             _updateState.value = when {
                 latest == null -> UpdateCheckState.Error("网络或服务器异常，请稍后再试")
-                UpdateChecker.compareVersions(latest, currentVersion) > 0 ->
-                    UpdateCheckState.HasUpdate(latest)
+                UpdateChecker.compareVersions(latest.version, currentVersion) > 0 ->
+                    UpdateCheckState.HasUpdate(latest.version, latest.apkUrl)
                 else -> UpdateCheckState.UpToDate
+            }
+        }
+    }
+
+    /** 应用内下载最新版 APK（带进度），完成后进入 DownloadReady 待安装 */
+    fun startDownload() {
+        val st = _updateState.value as? UpdateCheckState.HasUpdate ?: return
+        viewModelScope.launch {
+            _updateState.value = UpdateCheckState.Downloading(0f)
+            val file = File(appContext.cacheDir, "share/mementide-update.apk")
+            file.parentFile?.mkdirs()
+            file.delete()
+            val ok = UpdateChecker.downloadApk(st.apkUrl, file) { done, total ->
+                val progress = if (total > 0) done.toFloat() / total else 0f
+                _updateState.value = UpdateCheckState.Downloading(progress.coerceIn(0f, 1f))
+            }
+            _updateState.value = if (ok && file.length() > 0) {
+                UpdateCheckState.DownloadReady(file.absolutePath)
+            } else {
+                UpdateCheckState.Error("下载失败，请检查网络后重试")
             }
         }
     }
@@ -112,7 +137,9 @@ class SettingsViewModel @Inject constructor(
 sealed class UpdateCheckState {
     object Idle : UpdateCheckState()
     object Checking : UpdateCheckState()
-    data class HasUpdate(val latestVersion: String) : UpdateCheckState()
+    data class HasUpdate(val latestVersion: String, val apkUrl: String) : UpdateCheckState()
     object UpToDate : UpdateCheckState()
+    data class Downloading(val progress: Float) : UpdateCheckState()
+    data class DownloadReady(val filePath: String) : UpdateCheckState()
     data class Error(val message: String) : UpdateCheckState()
 }
