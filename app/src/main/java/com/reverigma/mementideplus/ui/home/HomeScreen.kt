@@ -64,6 +64,7 @@ import com.reverigma.mementideplus.ui.home.dialogs.BackfillDateDialog
 import com.reverigma.mementideplus.util.AchievementCardGenerator
 import com.reverigma.mementideplus.util.AchievementShare
 import com.reverigma.mementideplus.util.DateUtils
+import com.reverigma.mementideplus.util.rememberMaterialIconBitmap
 
 @Composable
 fun HomeScreen(
@@ -166,12 +167,18 @@ fun HomeScreen(
     // 打卡成就海报预览
     if (habitPoster != null) {
         val posterItem = habitPoster!!
+        val iconBmp = rememberMaterialIconBitmap(
+            iconName = posterItem.habit.iconName.ifBlank { "star" },
+            sizeDp = 280,
+            tint = Color.White
+        )
         val bmp = remember(posterItem.habit.id, posterItem.doneToday, posterItem.streak) {
             AchievementCardGenerator.generate(
                 posterItem.habit,
                 posterItem.streak,
                 posterItem.totalDone,
-                posterItem.thisWeekDone
+                posterItem.thisWeekDone,
+                iconBmp
             )
         }
         val ctx = LocalContext.current

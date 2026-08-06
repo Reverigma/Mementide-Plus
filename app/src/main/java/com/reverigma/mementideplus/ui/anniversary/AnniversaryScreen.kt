@@ -52,6 +52,7 @@ import com.reverigma.mementideplus.util.AchievementCardGenerator
 import com.reverigma.mementideplus.util.AchievementShare
 import com.reverigma.mementideplus.util.DateUtils
 import com.reverigma.mementideplus.util.LunarCalendar
+import com.reverigma.mementideplus.util.rememberMaterialIconBitmap
 
 @Composable
 fun AnniversaryScreen(
@@ -124,11 +125,17 @@ fun AnniversaryScreen(
     // 纪念日海报预览
     if (posterItem != null) {
         val p = posterItem!!
+        val iconBmp = rememberMaterialIconBitmap(
+            iconName = p.anniversary.iconName.ifBlank { "cake" },
+            sizeDp = 280,
+            tint = Color.White
+        )
         val bmp = remember(p.anniversary.id, p.countdownDays) {
             AchievementCardGenerator.generateAnniversary(
                 p.anniversary,
                 p.countdownDays,
-                AchievementCardGenerator.anniversaryDateLabel(p.anniversary)
+                AchievementCardGenerator.anniversaryDateLabel(p.anniversary),
+                iconBmp
             )
         }
         val ctx = LocalContext.current

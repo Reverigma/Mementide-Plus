@@ -401,7 +401,7 @@ fun SettingsScreen(
                             Text("海报预览", style = MaterialTheme.typography.titleMedium)
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                "点击习惯或纪念日卡片上的 emoji，弹出对应的海报，可右上角分享。",
+                                "点击习惯或纪念日卡片上的图标，弹出对应的海报，可右上角分享。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

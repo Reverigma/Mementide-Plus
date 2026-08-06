@@ -19,7 +19,11 @@ object AchievementCardGenerator {
     private const val W = 1200
     private const val H = 1500
 
-    fun generate(habit: Habit, streak: Int, totalDone: Int, thisWeekDone: Int): Bitmap {
+    /**
+     * 生成习惯成就海报。
+     * @param iconBmp Material 图标位图（可选，null 时回退首字母）
+     */
+    fun generate(habit: Habit, streak: Int, totalDone: Int, thisWeekDone: Int, iconBmp: Bitmap? = null): Bitmap {
         val tint = habit.colorInt
         val bitmap = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -36,8 +40,8 @@ object AchievementCardGenerator {
         val accentPaint = Paint().apply { color = tint }
         canvas.drawRoundRect(RectF(0f, 410f, W.toFloat(), 420f), 0f, 0f, accentPaint)
 
-        // 图标（大）：Material 图标以「习惯色圆 + 首字母」呈现
-        drawIconFallback(canvas, tint, habit.iconName.ifBlank { "star" }, 300f)
+        // 图标（大）：习惯色圆 + Material 图标位图（或首字母兜底）
+        drawIcon(canvas, tint, habit.iconName.ifBlank { "star" }, 300f, iconBmp)
 
         // 习惯名
         val namePaint = Paint().apply {
@@ -107,11 +111,13 @@ object AchievementCardGenerator {
      * 生成「纪念日倒数」分享海报图（风格与习惯成就卡一致）。
      * @param countdownDays 距下次纪念日的天数（>=0 还有N天；0=今天；<0 已过）
      * @param dateLabel 展示日期文本，如 "8月5日" 或 "农历八月初五"
+     * @param iconBmp Material 图标位图（可选，null 时回退首字母）
      */
     fun generateAnniversary(
         anniversary: Anniversary,
         countdownDays: Long,
-        dateLabel: String
+        dateLabel: String,
+        iconBmp: Bitmap? = null
     ): Bitmap {
         val tint = anniversary.colorInt
         val bitmap = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888)
@@ -129,8 +135,8 @@ object AchievementCardGenerator {
         val accentPaint = Paint().apply { color = tint }
         canvas.drawRoundRect(RectF(0f, 410f, W.toFloat(), 420f), 0f, 0f, accentPaint)
 
-        // 图标（大）：Material 图标以「纪念日色圆 + 首字母」呈现
-        drawIconFallback(canvas, tint, anniversary.iconName.ifBlank { "cake" }, 300f)
+        // 图标（大）：纪念日色圆 + Material 图标位图（或首字母兜底）
+        drawIcon(canvas, tint, anniversary.iconName.ifBlank { "cake" }, 300f, iconBmp)
 
         // 纪念日名
         val namePaint = Paint().apply {
@@ -237,8 +243,8 @@ object AchievementCardGenerator {
         }
     }
 
-    /** 海报上 Material Icon 的替代绘制：习惯色圆 + 白色首字符（icon 名首字母大写） */
-    private fun drawIconFallback(canvas: Canvas, tint: Int, iconName: String, baselineY: Float) {
+    /** 海报图标绘制：习惯色圆形底 + Material 图标位图（或首字母兜底） */
+    private fun drawIcon(canvas: Canvas, tint: Int, iconName: String, baselineY: Float, iconBmp: Bitmap?) {
         val cx = W / 2f
         val cy = baselineY - 120f
         val r = 140f
@@ -247,6 +253,19 @@ object AchievementCardGenerator {
             isAntiAlias = true
         }
         canvas.drawCircle(cx, cy, r, circlePaint)
+
+        if (iconBmp != null) {
+            // 图标位图覆盖圆形直径的 ~85%，居中
+            val iconR = r * 0.85f
+            canvas.drawBitmap(
+                iconBmp,
+                null,
+                android.graphics.RectF(cx - iconR, cy - iconR, cx + iconR, cy + iconR),
+                Paint().apply { isAntiAlias = true }
+            )
+            return
+        }
+        // 兜底：画首字母
         val letterPaint = Paint().apply {
             textSize = 160f
             textAlign = Paint.Align.CENTER
