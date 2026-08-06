@@ -3,8 +3,11 @@ package com.reverigma.mementideplus.ui.components
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -25,7 +29,8 @@ import androidx.compose.ui.window.Dialog
 
 /**
  * 海报预览对话框：展示生成的海报图，右上角分享按钮。
- * 图片按自身比例缩放，背景框随内容收紧，避免纵向撑满屏幕。
+ * - 图片按自身比例缩放，背景框随内容收紧，避免纵向撑满屏幕
+ * - 全屏透明遮罩可点击关闭（点框旁任意区域都灵敏返回），框内点击不会误关
  * @param bitmap 生成的海报位图
  * @param onShare 点击分享按钮回调（由调用方触发保存 + 系统分享）
  * @param onDismiss 关闭对话框
@@ -37,41 +42,58 @@ fun PosterDialog(
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
+        // 全屏遮罩：点击框旁任意区域关闭对话框（灵敏返回）
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp)
-                .background(
-                    androidx.compose.ui.graphics.Color.White,
-                    RoundedCornerShape(20.dp)
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onDismiss
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "海报",
+            // 海报框：自身消费点击（点框内不关闭，仅分享按钮生效）
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(bitmap.width.toFloat() / bitmap.height.toFloat())
-                    .padding(12.dp),
-                contentScale = ContentScale.Fit
-            )
-            // 右上角分享按钮（浮在海报上，白底圆）
-            Surface(
-                shape = CircleShape,
-                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.92f),
-                shadowElevation = 4.dp,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-            ) {
-                IconButton(onClick = onShare) {
-                    Icon(
-                        Icons.Filled.Share,
-                        contentDescription = "分享",
-                        tint = androidx.compose.ui.graphics.Color(0xFF1F2937),
-                        modifier = Modifier.size(24.dp)
+                    .fillMaxWidth(0.82f)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {}
                     )
+                    .background(
+                        androidx.compose.ui.graphics.Color.White,
+                        RoundedCornerShape(20.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "海报",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(bitmap.width.toFloat() / bitmap.height.toFloat())
+                        .padding(12.dp),
+                    contentScale = ContentScale.Fit
+                )
+                // 右上角分享按钮（浮在海报上，白底圆）
+                Surface(
+                    shape = CircleShape,
+                    color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.92f),
+                    shadowElevation = 4.dp,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                ) {
+                    IconButton(onClick = onShare) {
+                        Icon(
+                            Icons.Filled.Share,
+                            contentDescription = "分享",
+                            tint = androidx.compose.ui.graphics.Color(0xFF1F2937),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }
