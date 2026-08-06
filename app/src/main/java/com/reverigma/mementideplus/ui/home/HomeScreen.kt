@@ -171,7 +171,7 @@ fun HomeScreen(
         val iconBmp = rememberMaterialIconBitmap(
             iconName = posterItem.habit.iconName.ifBlank { "star" },
             sizeDp = 280,
-            tint = Color.White
+            tint = Color(posterItem.habit.colorInt)
         )
         val bmp = remember(posterItem.habit.id, posterItem.doneToday, posterItem.streak) {
             val bg = posterItem.habit.imagePath.ifBlank { null }?.let { ImageStore.decodeScaled(it) }

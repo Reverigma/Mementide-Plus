@@ -275,37 +275,49 @@ object AchievementCardGenerator {
         canvas.drawColor(Color.argb(204, 255, 255, 255))
     }
 
-    /** 海报图标绘制：习惯色圆形底 + Material 图标位图（或首字母兜底） */
+    /**
+     * 海报图标绘制：与卡片观感一致——浅色圆形底（tint 20%）+ tint 色图标。
+     * 图标位图已裁剪掉空白边缘，这里按内容等比缩放（最长边 = 圆径 55%）居中。
+     */
     private fun drawIcon(canvas: Canvas, tint: Int, iconName: String, baselineY: Float, iconBmp: Bitmap?) {
         val cx = W / 2f
         val cy = baselineY - 120f
         val r = 140f
+        // 浅色圆底（与卡片 IconBadge 的 20% alpha 一致）
         val circlePaint = Paint().apply {
             color = tint
+            alpha = 51 // 20%
             isAntiAlias = true
         }
         canvas.drawCircle(cx, cy, r, circlePaint)
 
         if (iconBmp != null) {
-            // 图标位图覆盖圆形直径的 ~85%，居中
-            val iconR = r * 0.85f
-            canvas.drawBitmap(
-                iconBmp,
-                null,
-                android.graphics.RectF(cx - iconR, cy - iconR, cx + iconR, cy + iconR),
-                Paint().apply { isAntiAlias = true }
-            )
-            return
+            val iw = iconBmp.width.toFloat()
+            val ih = iconBmp.height.toFloat()
+            if (iw > 0 && ih > 0) {
+                // 内容等比缩放：最长边为圆径 55%（卡片上图标/圆 = 22/44 = 50%，大图略放大）
+                val target = r * 2f * 0.55f
+                val scale = target / maxOf(iw, ih)
+                val w2 = iw * scale
+                val h2 = ih * scale
+                canvas.drawBitmap(
+                    iconBmp,
+                    null,
+                    RectF(cx - w2 / 2f, cy - h2 / 2f, cx + w2 / 2f, cy + h2 / 2f),
+                    Paint().apply { isAntiAlias = true }
+                )
+                return
+            }
         }
-        // 兜底：画首字母
+        // 兜底：tint 色首字母
         val letterPaint = Paint().apply {
-            textSize = 160f
+            textSize = 150f
             textAlign = Paint.Align.CENTER
-            color = Color.WHITE
+            color = tint
             typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
             isAntiAlias = true
         }
         val letter = iconName.take(1).uppercase()
-        canvas.drawText(letter, cx, cy + 56f, letterPaint)
+        canvas.drawText(letter, cx, cy + 52f, letterPaint)
     }
 }

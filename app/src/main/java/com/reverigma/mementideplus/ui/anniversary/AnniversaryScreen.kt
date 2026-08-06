@@ -129,7 +129,7 @@ fun AnniversaryScreen(
         val iconBmp = rememberMaterialIconBitmap(
             iconName = p.anniversary.iconName.ifBlank { "cake" },
             sizeDp = 280,
-            tint = Color.White
+            tint = Color(p.anniversary.colorInt)
         )
         val bmp = remember(p.anniversary.id, p.countdownDays) {
             val bg = p.anniversary.imagePath.ifBlank { null }?.let { ImageStore.decodeScaled(it) }
