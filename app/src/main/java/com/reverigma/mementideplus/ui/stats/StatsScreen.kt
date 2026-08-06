@@ -335,12 +335,14 @@ private fun heatmapColor(count: Int, maxCount: Int): Color {
         count <= 0 -> MaterialTheme.colorScheme.surfaceContainerHighest
         maxCount <= 0 -> MaterialTheme.colorScheme.surfaceContainerHighest
         else -> {
+            // 与主题统一：主色靛蓝的透明度阶（浅→深）
+            val base = MaterialTheme.colorScheme.primary
             val ratio = count.toFloat() / maxCount
             when {
-                ratio < 0.25f -> Color(0xFFDCFCE7) // 浅绿
-                ratio < 0.5f -> Color(0xFF86EFAC)  // 绿
-                ratio < 0.75f -> Color(0xFF22C55E) // 深绿
-                else -> Color(0xFF15803D)          // 最深绿
+                ratio < 0.25f -> base.copy(alpha = 0.2f)
+                ratio < 0.5f -> base.copy(alpha = 0.4f)
+                ratio < 0.75f -> base.copy(alpha = 0.65f)
+                else -> base.copy(alpha = 0.9f)
             }
         }
     }
@@ -348,16 +350,17 @@ private fun heatmapColor(count: Int, maxCount: Int): Color {
 
 @Composable
 private fun HeatmapLegend() {
+    val base = MaterialTheme.colorScheme.primary
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text("少", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         listOf(
-            Color(0xFFDCFCE7),
-            Color(0xFF86EFAC),
-            Color(0xFF22C55E),
-            Color(0xFF15803D)
+            base.copy(alpha = 0.2f),
+            base.copy(alpha = 0.4f),
+            base.copy(alpha = 0.65f),
+            base.copy(alpha = 0.9f)
         ).forEach { c ->
             Box(
                 modifier = Modifier
