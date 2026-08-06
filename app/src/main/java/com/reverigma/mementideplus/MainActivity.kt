@@ -7,14 +7,19 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Cake
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -111,28 +116,52 @@ class MainActivity : ComponentActivity() {
                                 selected = selected == 0,
                                 onClick = { scope.launch { pagerState.scrollToPage(0) } },
                                 colors = navColors,
-                                icon = { Icon(Icons.Filled.CheckCircle, "今日") },
+                                icon = {
+                                    Icon(
+                                        imageVector = if (selected == 0) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
+                                        contentDescription = "今日",
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                },
                                 label = null
                             )
                             NavigationBarItem(
                                 selected = selected == 1,
                                 onClick = { scope.launch { pagerState.scrollToPage(1) } },
                                 colors = navColors,
-                                icon = { Icon(Icons.Filled.Cake, "纪念日") },
+                                icon = {
+                                    Icon(
+                                        imageVector = if (selected == 1) Icons.Filled.Cake else Icons.Outlined.Cake,
+                                        contentDescription = "纪念日",
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                },
                                 label = null
                             )
                             NavigationBarItem(
                                 selected = selected == 2,
                                 onClick = { scope.launch { pagerState.scrollToPage(2) } },
                                 colors = navColors,
-                                icon = { Icon(Icons.Filled.ShowChart, "统计") },
+                                icon = {
+                                    Icon(
+                                        imageVector = if (selected == 2) Icons.Filled.BarChart else Icons.Outlined.BarChart,
+                                        contentDescription = "统计",
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                },
                                 label = null
                             )
                             NavigationBarItem(
                                 selected = selected == 3,
                                 onClick = { scope.launch { pagerState.scrollToPage(3) } },
                                 colors = navColors,
-                                icon = { Icon(Icons.Filled.Settings, "设置") },
+                                icon = {
+                                    Icon(
+                                        imageVector = if (selected == 3) Icons.Filled.Settings else Icons.Outlined.Settings,
+                                        contentDescription = "设置",
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                },
                                 label = null
                             )
                         }
