@@ -61,7 +61,7 @@ fun PosterDialog(
             // 海报框：自身消费点击（点框内不关闭，仅分享按钮生效）
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.82f)
+                    .fillMaxWidth(0.7f)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
