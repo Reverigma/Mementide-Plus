@@ -51,3 +51,6 @@ _g87.zip
 # Build environment debris
 .gradle_*/
 b.txt
+
+# Signing credential backup (defensive: never track even if copied into repo)
+keys/
