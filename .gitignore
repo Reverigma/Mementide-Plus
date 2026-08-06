@@ -54,3 +54,6 @@ b.txt
 
 # Signing credential backup (defensive: never track even if copied into repo)
 keys/
+
+# Broken .git backup dir (was accidentally committed; never track again)
+.git_broken/
