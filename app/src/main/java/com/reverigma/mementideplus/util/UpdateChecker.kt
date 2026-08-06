@@ -21,6 +21,9 @@ object UpdateChecker {
     private const val OWNER = "Reverigma"
     private const val REPO = "Mementide-Plus"
 
+    /** 浏览器风格 UA：Gitee 对非浏览器 UA 的匿名 API 请求风控较严（会 404/403） */
+    private const val USER_AGENT = "Mozilla/5.0 (Linux; Android 13; MementidePlus) AppleWebKit/537.36"
+
     /** 各源最新 release API（公开仓库免鉴权） */
     private fun latestApiUrl(source: String): String = when (source) {
         SOURCE_GITEE -> "https://gitee.com/api/v5/repos/$OWNER/$REPO/releases/latest"
@@ -38,46 +41,79 @@ object UpdateChecker {
 
     /**
      * 查询远端最新版本号与 APK 下载地址，失败返回 null。
+     * Gitee 源：优先 API（浏览器 UA），失败兜底用网页重定向解析最新 tag。
      * 在 IO 线程执行网络请求。
      */
     suspend fun fetchLatestRelease(source: String): LatestRelease? = withContext(Dispatchers.IO) {
-        try {
-            val conn = URL(latestApiUrl(source)).openConnection() as HttpURLConnection
-            conn.requestMethod = "GET"
-            conn.connectTimeout = 8000
-            conn.readTimeout = 8000
-            conn.setRequestProperty("Accept", "application/json")
-            conn.setRequestProperty("User-Agent", "MementidePlus")
-            try {
-                if (conn.responseCode != 200) {
-                    null
-                } else {
-                    val body = conn.inputStream.bufferedReader().use { it.readText() }
-                    val json = JSONObject(body)
-                    val tag = json.optString("tag_name").takeIf { it.isNotBlank() } ?: return@withContext null
-                    // 优先取 assets 里的 APK 下载地址（Gitee 资产含源码 zip，需过滤 .apk）
-                    var apkUrl = ""
-                    val assets = json.optJSONArray("assets")
-                    if (assets != null) {
-                        for (i in 0 until assets.length()) {
-                            val name = assets.getJSONObject(i).optString("name", "")
-                            if (name.endsWith(".apk")) {
-                                apkUrl = assets.getJSONObject(i).optString("browser_download_url", "")
-                                break
-                            }
+        val fromApi = queryLatestFromApi(source)
+        if (fromApi != null) {
+            fromApi
+        } else if (source == SOURCE_GITEE) {
+            // Gitee 兜底：/releases/latest 网页 302 重定向到最新版本页，解析 tag
+            queryLatestFromGiteeRedirect()
+        } else {
+            null
+        }
+    }
+
+    private fun queryLatestFromApi(source: String): LatestRelease? {
+        var conn: HttpURLConnection? = null
+        return try {
+            conn = URL(latestApiUrl(source)).openConnection() as HttpURLConnection
+            conn!!.requestMethod = "GET"
+            conn!!.connectTimeout = 8000
+            conn!!.readTimeout = 8000
+            conn!!.setRequestProperty("Accept", "application/json")
+            conn!!.setRequestProperty("User-Agent", USER_AGENT)
+            if (conn!!.responseCode != 200) {
+                null
+            } else {
+                val body = conn!!.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(body)
+                val tag = json.optString("tag_name").takeIf { it.isNotBlank() } ?: return null
+                // 优先取 assets 里的 APK 下载地址（Gitee 资产含源码 zip，需过滤 .apk）
+                var apkUrl = ""
+                val assets = json.optJSONArray("assets")
+                if (assets != null) {
+                    for (i in 0 until assets.length()) {
+                        val name = assets.getJSONObject(i).optString("name", "")
+                        if (name.endsWith(".apk")) {
+                            apkUrl = assets.getJSONObject(i).optString("browser_download_url", "")
+                            break
                         }
                     }
-                    // 兜底：APK 命名固定为 MementidePlus-{tag}.apk，直链可离线拼
-                    if (apkUrl.isBlank()) {
-                        apkUrl = "${downloadBase(source)}/$tag/MementidePlus-$tag.apk"
-                    }
-                    LatestRelease(tag, apkUrl, source)
                 }
-            } finally {
-                conn.disconnect()
+                // 兜底：APK 命名固定为 MementidePlus-{tag}.apk，直链可离线拼
+                if (apkUrl.isBlank()) {
+                    apkUrl = "${downloadBase(source)}/$tag/MementidePlus-$tag.apk"
+                }
+                LatestRelease(tag, apkUrl, source)
             }
         } catch (_: Exception) {
             null
+        } finally {
+            conn?.disconnect()
+        }
+    }
+
+    /** Gitee 网页兜底：请求 /releases/latest，从 302 Location 中解析最新版本 tag */
+    private fun queryLatestFromGiteeRedirect(): LatestRelease? {
+        var conn: HttpURLConnection? = null
+        return try {
+            conn = URL("https://gitee.com/$OWNER/$REPO/releases/latest").openConnection() as HttpURLConnection
+            conn!!.requestMethod = "GET"
+            conn!!.connectTimeout = 8000
+            conn!!.readTimeout = 8000
+            conn!!.instanceFollowRedirects = false
+            conn!!.setRequestProperty("User-Agent", USER_AGENT)
+            val loc = conn!!.getHeaderField("Location") ?: return null
+            // Location 形如 .../releases/v0.5.21 或 v0.5.21
+            val tag = Regex("v\\d+\\.\\d+\\.\\d+").find(loc)?.value ?: return null
+            LatestRelease(tag, "${downloadBase(SOURCE_GITEE)}/$tag/MementidePlus-$tag.apk", SOURCE_GITEE)
+        } catch (_: Exception) {
+            null
+        } finally {
+            conn?.disconnect()
         }
     }
 
