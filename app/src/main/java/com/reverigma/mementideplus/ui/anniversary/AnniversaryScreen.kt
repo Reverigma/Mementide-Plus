@@ -1,6 +1,15 @@
 package com.reverigma.mementideplus.ui.anniversary
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,14 +44,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -84,15 +97,26 @@ fun AnniversaryScreen(
             if (state.items.isEmpty()) {
                 item { EmptyAnniversaries(onAdd = onAddAnniversary) }
             } else {
-                items(state.items, key = { it.anniversary.id }) { item ->
-                    AnniversaryCard(
-                        item = item,
-                        showAdvanced = advancedMode,
-                        posterEnabled = posterTap,
-                        onPoster = { posterItem = item },
-                        onEdit = { toEdit = item.anniversary },
-                        onDelete = { toDelete = item.anniversary }
-                    )
+                itemsIndexed(state.items, key = { _, item -> item.anniversary.id }) { index, item ->
+                    var entered by rememberSaveable(item.anniversary.id) { mutableStateOf(false) }
+                    LaunchedEffect(Unit) { entered = true }
+                    AnimatedVisibility(
+                        visible = entered,
+                        enter = fadeIn(animationSpec = tween(320, delayMillis = index * 45)) +
+                            slideInVertically(
+                                animationSpec = tween(320, delayMillis = index * 45),
+                                initialOffsetY = { it / 5 }
+                            )
+                    ) {
+                        AnniversaryCard(
+                            item = item,
+                            showAdvanced = advancedMode,
+                            posterEnabled = posterTap,
+                            onPoster = { posterItem = item },
+                            onEdit = { toEdit = item.anniversary },
+                            onDelete = { toDelete = item.anniversary }
+                        )
+                    }
                 }
             }
         }
@@ -217,14 +241,26 @@ private fun AnniversaryCard(
         item.countdownDays in 1..7 -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
+    // 按压手感：按下轻微缩小，抬手弹性回弹
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.97f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+        label = "cardScale"
+    )
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer { scaleX = scale; scaleY = scale },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .padding(16.dp)
+                .clickable(interactionSource = interactionSource, indication = null, onClick = {}),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(

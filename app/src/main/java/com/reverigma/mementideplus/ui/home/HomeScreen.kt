@@ -1,6 +1,17 @@
 package com.reverigma.mementideplus.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,16 +55,20 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -110,20 +126,32 @@ fun HomeScreen(
             if (state.items.isEmpty()) {
                 item { EmptyHabits(onAdd = onAddHabit) }
             } else {
-                items(state.items, key = { it.habit.id }) { item ->
-                    HabitCard(
-                        item = item,
-                        showAdvanced = advancedMode,
-                        posterEnabled = posterTap,
-                        onPoster = { habitPoster = item },
-                        onToggle = { viewModel.toggleToday(item.habit) },
-                        onBackfill = { habitToBackfill = item.habit },
-                        onEdit = { habitToEdit = item.habit },
-                        onDelete = { habitToDelete = item.habit },
-                        onMoveTop = { viewModel.moveHabitToTop(item.habit) },
-                        onMoveUp = { viewModel.moveHabitUp(item.habit) },
-                        onMoveDown = { viewModel.moveHabitDown(item.habit) }
-                    )
+                itemsIndexed(state.items, key = { _, item -> item.habit.id }) { index, item ->
+                    // 入场动画：依次淡入 + 轻微上移
+                    var entered by rememberSaveable(item.habit.id) { mutableStateOf(false) }
+                    LaunchedEffect(Unit) { entered = true }
+                    AnimatedVisibility(
+                        visible = entered,
+                        enter = fadeIn(animationSpec = tween(320, delayMillis = index * 45)) +
+                            slideInVertically(
+                                animationSpec = tween(320, delayMillis = index * 45),
+                                initialOffsetY = { it / 5 }
+                            )
+                    ) {
+                        HabitCard(
+                            item = item,
+                            showAdvanced = advancedMode,
+                            posterEnabled = posterTap,
+                            onPoster = { habitPoster = item },
+                            onToggle = { viewModel.toggleToday(item.habit) },
+                            onBackfill = { habitToBackfill = item.habit },
+                            onEdit = { habitToEdit = item.habit },
+                            onDelete = { habitToDelete = item.habit },
+                            onMoveTop = { viewModel.moveHabitToTop(item.habit) },
+                            onMoveUp = { viewModel.moveHabitUp(item.habit) },
+                            onMoveDown = { viewModel.moveHabitDown(item.habit) }
+                        )
+                    }
                 }
             }
         }
@@ -202,6 +230,17 @@ fun HomeScreen(
 @Composable
 private fun TodayProgress(done: Int, total: Int) {
     val fraction = if (total > 0) done.toFloat() / total else 0f
+    // 圆环圆弧增长 + 数字滚动
+    val animatedFraction by animateFloatAsState(
+        targetValue = fraction,
+        animationSpec = tween(600),
+        label = "progress"
+    )
+    val animatedDone by animateIntAsState(
+        targetValue = done,
+        animationSpec = tween(600),
+        label = "done"
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -216,7 +255,7 @@ private fun TodayProgress(done: Int, total: Int) {
                 trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
             )
             CircularProgressIndicator(
-                progress = { fraction },
+                progress = { animatedFraction },
                 modifier = Modifier.size(52.dp),
                 color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 5.dp,
@@ -224,7 +263,7 @@ private fun TodayProgress(done: Int, total: Int) {
                 trackColor = Color.Transparent
             )
             Text(
-                "$done/$total",
+                "$animatedDone/$total",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -308,14 +347,38 @@ private fun HabitCard(
 ) {
     val h = item.habit
     val tint = Color(h.colorInt)
+    // 按压手感：按下轻微缩小，抬手弹性回弹
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.97f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+        label = "cardScale"
+    )
+    // 打卡弹跳：刚勾选时 emoji 短暂放大回弹
+    val popScale = remember { Animatable(1f) }
+    LaunchedEffect(item.doneToday) {
+        if (item.doneToday) {
+            popScale.snapTo(1f)
+            popScale.animateTo(1.25f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessHigh))
+            popScale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+        }
+    }
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer { scaleX = scale; scaleY = scale },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .padding(16.dp)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) { onToggle() },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
@@ -323,6 +386,7 @@ private fun HabitCard(
                 color = tint.copy(alpha = 0.20f),
                 modifier = Modifier
                     .size(44.dp)
+                    .graphicsLayer { scaleX = popScale.value; scaleY = popScale.value }
                     .then(
                         if (posterEnabled) {
                             Modifier.clickable(onClick = onPoster)
