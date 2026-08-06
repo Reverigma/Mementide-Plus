@@ -1,13 +1,14 @@
 package com.reverigma.mementideplus.ui.stats
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -31,10 +32,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,13 +50,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.collectAsState
 import com.reverigma.mementideplus.util.DateUtils
-
 @Composable
 fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
     val state by viewModel.uiState.collectAsState()
     val showMonth by viewModel.statsMonthCalendar.collectAsState()
     val showHeat by viewModel.statsHeatmap.collectAsState()
     val viewOrder by viewModel.statsViewOrder.collectAsState()
+    // 点击月历日期查看当天打卡详情
+    var detailDay by remember { mutableStateOf<String?>(null) }
+    val detailNames = detailDay?.let { state.dayDetails[it].orEmpty() } ?: emptyList()
     // 按设置顺序排列视图
     val views = buildList {
         if (showMonth) add("month")
@@ -131,7 +139,8 @@ fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
                                 Spacer(Modifier.height(12.dp))
                                 MonthCalendar(
                                     cells = state.monthCells,
-                                    activeHabits = state.activeHabits
+                                    activeHabits = state.activeHabits,
+                                    onDayClick = { detailDay = it }
                                 )
                             }
                         }
@@ -162,6 +171,45 @@ fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
                 }
             }
         }
+    }
+
+    // 当天打卡详情对话框
+    if (detailDay != null) {
+        AlertDialog(
+            onDismissRequest = { detailDay = null },
+            title = { Text(DateUtils.formatDate(detailDay ?: "")) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (detailNames.isEmpty()) {
+                        Text(
+                            "这一天没有打卡记录",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        detailNames.forEach { name ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(name, style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "共 ${detailNames.size} 个习惯完成打卡",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { detailDay = null }) { Text("关闭") } }
+        )
     }
 }
 
@@ -212,20 +260,25 @@ private fun SummaryCard(
 @Composable
 private fun Heatmap(state: StatsUiState) {
     Column {
-        // 月份标签行
+        // 月份标签行（与格子同宽，左对齐）
         MonthLabels(state.weeks)
         Spacer(Modifier.height(6.dp))
+        // 18 列按权重铺满卡片宽度、居中，格子随屏宽等比缩放
         Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             state.weeks.forEach { week ->
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
                     week.forEach { cell ->
                         val color = heatmapColor(cell.count, state.maxCount)
                         Box(
                             modifier = Modifier
-                                .size(12.dp)
+                                .fillMaxWidth()
+                                .aspectRatio(1f)
                                 .clip(RoundedCornerShape(3.dp))
                                 .background(color)
                         )
@@ -253,11 +306,16 @@ private fun MonthLabels(weeks: List<List<DayCell>>) {
         } else ""
     }
     Row(
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         labels.forEach { label ->
-            Box(modifier = Modifier.size(12.dp), contentAlignment = Alignment.TopCenter) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(14.dp),
+                contentAlignment = Alignment.TopCenter
+            ) {
                 if (label.isNotBlank()) {
                     Text(
                         label,
@@ -351,7 +409,7 @@ private fun EmptyStats() {
 }
 
 @Composable
-private fun MonthCalendar(cells: List<MonthCell>, activeHabits: Int) {
+private fun MonthCalendar(cells: List<MonthCell>, activeHabits: Int, onDayClick: (String) -> Unit) {
     val weekdayLabels = listOf("日", "一", "二", "三", "四", "五", "六")
     Column {
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -387,6 +445,7 @@ private fun MonthCalendar(cells: List<MonthCell>, activeHabits: Int) {
                                         if (cell.count > 0) color
                                         else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
                                     )
+                                    .clickable { onDayClick(cell.date) }
                                     .then(
                                         if (cell.isToday) {
                                             Modifier

@@ -25,7 +25,9 @@ data class StatsUiState(
     val activeHabits: Int = 0,
     val maxCount: Int = 1,
     val monthCells: List<MonthCell> = emptyList(),
-    val monthLabel: String = ""
+    val monthLabel: String = "",
+    /** 某天打卡了哪些习惯：date -> 习惯名列表 */
+    val dayDetails: Map<String, List<String>> = emptyMap()
 )
 
 @HiltViewModel
@@ -73,6 +75,11 @@ class StatsViewModel @Inject constructor(
         val today = DateUtils.todayStr()
         val done = records.filter { it.done }
         val countMap = done.groupingBy { it.date }.eachCount()
+        // 当天打卡详情：date -> 习惯名列表
+        val habitById = habits.associateBy { it.id }
+        val dayDetails = done.groupBy { it.date }.mapValues { (_, recs) ->
+            recs.mapNotNull { r -> habitById[r.habitId]?.name }.distinct()
+        }
 
         val perHabit = habits.map { h ->
             val dates = done.filter { it.habitId == h.id }.map { it.date }.toSet()
@@ -119,6 +126,6 @@ class StatsViewModel @Inject constructor(
         while (monthCells.size % 7 != 0) monthCells.add(MonthCell(null, 0, false))
         val monthLabel = monthDate.format(java.time.format.DateTimeFormatter.ofPattern("yyyy年M月"))
 
-        return StatsUiState(weeks, perHabit, total, best, habits.size, maxCount, monthCells, monthLabel)
+        return StatsUiState(weeks, perHabit, total, best, habits.size, maxCount, monthCells, monthLabel, dayDetails)
     }
 }

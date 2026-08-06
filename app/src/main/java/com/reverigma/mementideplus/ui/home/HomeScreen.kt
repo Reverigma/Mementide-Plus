@@ -232,7 +232,7 @@ private fun TodayProgress(done: Int, total: Int) {
         Spacer(Modifier.width(14.dp))
         Column {
             Text(
-                if (done == total) "全部完成 🎉" else "已完成 $done / $total",
+                if (done == total) "全部完成" else "已完成 $done / $total",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
