@@ -23,14 +23,14 @@ import androidx.compose.ui.graphics.luminance
 fun glassBackgroundBrush(): Brush {
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     return if (isDark) {
-        // 深色白透：深灰 → 微冷深灰（不彩）
+        // 深色：深灰 → 微冷深灰（不彩）
         Brush.verticalGradient(
             listOf(Color(0xFF1A1C22), Color(0xFF14151A), Color(0xFF1C181E))
         )
     } else {
-        // 白透：纯白 → 微冷白 → 微暖白（不彩，只有极淡的冷暖倾向）
+        // 白透：白但带极淡色相（淡蓝 → 白 → 淡粉），视觉仍是"白"，但玻璃能透出淡彩
         Brush.verticalGradient(
-            listOf(Color(0xFFFFFFFF), Color(0xFFF7F9FF), Color(0xFFFFFCF8))
+            listOf(Color(0xFFF4F7FF), Color(0xFFFDFEFF), Color(0xFFFFF6FB))
         )
     }
 }
@@ -51,11 +51,13 @@ private fun glows(isDark: Boolean): List<Glow> = if (isDark) {
         Glow(0.5f, 1.1f, Color(0x0CFFFFFF), 720f)
     )
 } else {
-    // 白透：全部用极淡的白色光晕（模拟天光漫射），不引入彩色
+    // 白透：极淡的彩色光斑（alpha 8~12%），白色背景下透出轻微氛围，玻璃才有"可透之物"
     listOf(
-        Glow(0.12f, -0.08f, Color(0x33FFFFFF), 900f),  // 白亮光晕
-        Glow(1.0f, 0.2f, Color(0x26FFFFFF), 800f),
-        Glow(0.5f, 1.1f, Color(0x1AFFFFFF), 720f)
+        Glow(0.12f, -0.08f, Color(0x1F4F46E5), 950f),  // 淡靛蓝
+        Glow(0.95f, 0.15f, Color(0x178B5CF6), 850f),   // 淡紫
+        Glow(-0.05f, 0.7f, Color(0x120EA5E9), 880f),   // 淡蓝
+        Glow(1.0f, 0.95f, Color(0x12F472B6), 780f),    // 淡粉
+        Glow(0.45f, 1.12f, Color(0x14F59E0B), 740f)    // 淡暖橙
     )
 }
 
