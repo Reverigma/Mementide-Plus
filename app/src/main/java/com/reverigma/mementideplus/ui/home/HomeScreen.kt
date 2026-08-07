@@ -65,10 +65,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -101,8 +104,13 @@ fun HomeScreen(
 
     GlassBackground(modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
+            val barLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
+                Color(0x26FFFFFF) else Color(0x4DFFFFFF)
             TopAppBar(
                 title = { Text("今日") },
+                modifier = Modifier.drawBehind {
+                    drawLine(barLine, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
                     scrolledContainerColor = MaterialTheme.colorScheme.surface

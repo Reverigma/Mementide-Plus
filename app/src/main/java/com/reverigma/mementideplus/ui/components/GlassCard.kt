@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -18,50 +19,77 @@ import androidx.compose.ui.unit.dp
 
 /**
  * 液态玻璃卡片（iOS 26 Liquid Glass 质感）：
- * - 玻璃底：顶部略亮 → 底部略暗的垂直渐变（模拟玻璃透光厚度）
- * - 高光描边：上沿白色亮线 → 下沿渐隐（模拟玻璃边缘反光）
- * - 大圆角 + 柔和悬浮阴影（主色光晕）
+ * - 玻璃底：顶部亮 → 底部暗的垂直渐变（透光厚度）
+ * - 内高光：卡片内部上沿一道白色渐变光带（玻璃上沿反光）
+ * - 边缘融化：底部渐变为全透明，卡片"融"进背景（iOS 玻璃标志性特征）
+ * - 高光描边：上沿亮白线 → 下沿渐隐（边缘反光）
+ * - 大圆角 + 柔和悬浮阴影
  */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(20.dp),
+    shape: Shape = RoundedCornerShape(24.dp),
     content: @Composable BoxScope.() -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    // 玻璃底：顶部亮 → 底部渐透明（融进背景）
     val glass = if (isDark) {
         Brush.verticalGradient(
-            listOf(Color(0x2EFFFFFF), Color(0x1FFFFFFF), Color(0x14FFFFFF))
+            0f to Color(0x38FFFFFF),   // 顶部 22% 白
+            0.55f to Color(0x1FFFFFFF), // 中部 12%
+            1f to Color(0x00FFFFFF)     // 底部全透明（融化）
         )
     } else {
         Brush.verticalGradient(
-            listOf(Color(0xE6FFFFFF), Color(0xD9FFFFFF), Color(0xC4FFFFFF))
+            0f to Color(0xE8FFFFFF),   // 顶部 91% 白
+            0.55f to Color(0xD6FFFFFF), // 中部 84%
+            1f to Color(0x00FFFFFF)     // 底部全透明（融化）
         )
     }
-    // 高光描边：顶部亮白 → 中段 40% → 底部近乎透明
+    // 内高光光带：卡片上沿一道亮白渐变
+    val innerGlow = if (isDark) {
+        Brush.verticalGradient(
+            0f to Color(0x59FFFFFF),
+            0.22f to Color(0x14FFFFFF),
+            1f to Color(0x00FFFFFF)
+        )
+    } else {
+        Brush.verticalGradient(
+            0f to Color(0x99FFFFFF),
+            0.25f to Color(0x30FFFFFF),
+            1f to Color(0x00FFFFFF)
+        )
+    }
+    // 高光描边：上沿亮白 → 中段 50% → 底部渐隐
     val borderBrush = if (isDark) {
         Brush.verticalGradient(
-            listOf(Color(0x66FFFFFF), Color(0x26FFFFFF), Color(0x0DFFFFFF))
+            listOf(Color(0x80FFFFFF), Color(0x33FFFFFF), Color(0x0DFFFFFF))
         )
     } else {
         Brush.verticalGradient(
-            listOf(Color(0xFFFFFFFF), Color(0x80FFFFFF), Color(0x26FFFFFF))
+            listOf(Color(0xFFFFFFFF), Color(0xB3FFFFFF), Color(0x33FFFFFF))
         )
     }
-    val shadowColor = if (isDark) Color(0x40000000) else MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+    val shadowColor = if (isDark) Color(0x50000000) else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
 
     Box(
         modifier = modifier
             .shadow(
-                elevation = 10.dp,
+                elevation = 12.dp,
                 shape = shape,
                 spotColor = shadowColor,
                 ambientColor = shadowColor
             )
             .clip(shape)
             .background(glass)
-            .border(width = 1.dp, brush = borderBrush, shape = shape)
+            .border(width = 2.dp, brush = borderBrush, shape = shape)
     ) {
+        // 内高光光带（玻璃上沿反光）
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(innerGlow)
+        )
         content()
     }
 }
