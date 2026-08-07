@@ -101,25 +101,14 @@ fun HomeScreen(
     var habitToDelete by remember { mutableStateOf<Habit?>(null) }
     var habitPoster by remember { mutableStateOf<HabitItem?>(null) }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        val barLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
-            Color(0x26FFFFFF) else Color(0x4DFFFFFF)
-        TopAppBar(
-            title = { Text("今日") },
-                modifier = Modifier.drawBehind {
-                    drawLine(barLine, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        // 列表（无入场动画，简洁直接）
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+    // 列表（顶栏为全局覆盖层，此处只留内容；顶部留出覆盖栏高度）
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            start = 20.dp, end = 20.dp, top = 80.dp, bottom = 110.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
             item {
                 Text(
                     state.dateLabel,
@@ -153,7 +142,6 @@ fun HomeScreen(
                 }
             }
         }
-    }
 
     if (habitToEdit != null) {
         AddHabitDialog(

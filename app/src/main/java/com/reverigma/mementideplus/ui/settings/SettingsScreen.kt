@@ -142,22 +142,11 @@ fun SettingsScreen(
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        val barLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
-            Color(0x26FFFFFF) else Color(0x4DFFFFFF)
-        TopAppBar(
-            title = { Text("设置") },
-            modifier = Modifier.drawBehind {
-                drawLine(barLine, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                scrolledContainerColor = MaterialTheme.colorScheme.surface
-            )
-        )
+        // 顶栏为全局覆盖层；此处只留内容（顶部留出覆盖栏高度）
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .padding(start = 20.dp, end = 20.dp, top = 80.dp, bottom = 110.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {

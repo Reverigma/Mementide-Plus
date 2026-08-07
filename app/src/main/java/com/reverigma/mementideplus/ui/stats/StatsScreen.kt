@@ -71,21 +71,12 @@ fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        val barLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
-            Color(0x26FFFFFF) else Color(0x4DFFFFFF)
-        TopAppBar(
-            title = { Text("统计") },
-            modifier = Modifier.drawBehind {
-                drawLine(barLine, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                scrolledContainerColor = MaterialTheme.colorScheme.surface
-            )
-        )
+        // 顶栏为全局覆盖层；此处只留内容（顶部留出覆盖栏高度）
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+            contentPadding = PaddingValues(
+                start = 20.dp, end = 20.dp, top = 80.dp, bottom = 110.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {

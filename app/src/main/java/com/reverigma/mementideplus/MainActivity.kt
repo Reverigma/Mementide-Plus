@@ -5,10 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -19,6 +23,7 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -100,31 +106,9 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .then(glassBackgroundModifier())
                 ) {
+                // 内容层：全屏滚动（Scaffold 只负责系统栏 insets，无顶栏/底栏占位）
                 Scaffold(
-                    // 页面透明，露出全局背景层
-                    containerColor = Color.Transparent,
-                    bottomBar = {
-                        FloatingDock(
-                            selected = selected,
-                            onSelect = { scope.launch { pagerState.scrollToPage(it) } }
-                        )
-                    },
-                    floatingActionButton = {
-                        if (selected != 2 && selected != 3) {
-                            FloatingActionButton(
-                                onClick = { if (selected == 0) showAddHabit = true else showAddAnni = true },
-                                shape = RoundedCornerShape(18.dp),
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                elevation = FloatingActionButtonDefaults.elevation(
-                                    defaultElevation = 0.dp,
-                                    pressedElevation = 2.dp
-                                )
-                            ) {
-                                Icon(Icons.Filled.Add, "添加")
-                            }
-                        }
-                    }
+                    containerColor = Color.Transparent
                 ) { padding ->
                     HorizontalPager(
                         state = pagerState,
@@ -134,9 +118,65 @@ class MainActivity : ComponentActivity() {
                             0 -> HomeScreen(homeVm, Modifier.fillMaxSize(), onAddHabit = { showAddHabit = true })
                             1 -> AnniversaryScreen(anniVm, Modifier.fillMaxSize(), onAddAnniversary = { showAddAnni = true })
                             2 -> StatsScreen(statsVm, Modifier.fillMaxSize())
-                                3 -> SettingsScreen(settingsVm, Modifier.fillMaxSize())
+                            3 -> SettingsScreen(settingsVm, Modifier.fillMaxSize())
                         }
                     }
+                }
+                // 覆盖层：顶部玻璃栏 + 悬浮 Dock + FAB（浮在内容之上，内容滚动从玻璃下方穿过）
+                Box(Modifier.fillMaxSize()) {
+                    // 顶部玻璃栏（标题按当前页）
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .height(56.dp)
+                            .background(
+                                if (isDark) Color(0x8C14151A) else Color(0xE6FFFFFF)
+                            )
+                            .drawBehind {
+                                val line = if (isDark) Color(0x26FFFFFF) else Color(0x4DFFFFFF)
+                                drawLine(line, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
+                            }
+                            .align(Alignment.TopCenter)
+                    ) {
+                        Text(
+                            when (selected) {
+                                0 -> "今日"
+                                1 -> "纪念日"
+                                2 -> "统计"
+                                else -> "设置"
+                            },
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .padding(horizontal = 20.dp)
+                        )
+                    }
+                    // FAB（在 Dock 上方）
+                    if (selected != 2 && selected != 3) {
+                        FloatingActionButton(
+                            onClick = { if (selected == 0) showAddHabit = true else showAddAnni = true },
+                            shape = RoundedCornerShape(18.dp),
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            elevation = FloatingActionButtonDefaults.elevation(
+                                defaultElevation = 0.dp,
+                                pressedElevation = 2.dp
+                            ),
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(end = 20.dp, bottom = 104.dp)
+                        ) {
+                            Icon(Icons.Filled.Add, "添加")
+                        }
+                    }
+                    // 悬浮胶囊 Dock（覆盖层）
+                    FloatingDock(
+                        selected = selected,
+                        onSelect = { scope.launch { pagerState.scrollToPage(it) } },
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
                 }
                 }   // 全局背景 Box 闭合
 

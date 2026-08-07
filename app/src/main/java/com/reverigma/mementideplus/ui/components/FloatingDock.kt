@@ -56,7 +56,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun FloatingDock(
     selected: Int,
-    onSelect: (Int) -> Unit
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val tabs = listOf(
@@ -82,7 +83,7 @@ fun FloatingDock(
     val pillColor = if (isDark) Color(0x33FFFFFF) else Color(0xE6FFFFFF)
 
     BoxWithConstraints(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(horizontal = 16.dp, vertical = 12.dp)
