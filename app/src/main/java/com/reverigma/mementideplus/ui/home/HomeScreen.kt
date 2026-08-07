@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Habit
 import com.reverigma.mementideplus.ui.components.GlassBackground
+import com.reverigma.mementideplus.ui.components.GlassCard
 import com.reverigma.mementideplus.ui.components.HabitIcon
 import com.reverigma.mementideplus.ui.components.PosterDialog
 import com.reverigma.mementideplus.ui.home.dialogs.BackfillDateDialog
@@ -359,13 +360,10 @@ private fun HabitCard(
         }
         lastDone = item.doneToday
     }
-    Card(
+    GlassCard(
         modifier = Modifier
             .fillMaxWidth()
-            .graphicsLayer { scaleX = scale; scaleY = scale },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
     ) {
         Row(
             modifier = Modifier

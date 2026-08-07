@@ -64,6 +64,7 @@ import android.content.Intent
 import android.provider.Settings
 import com.reverigma.mementideplus.BuildConfig
 import com.reverigma.mementideplus.reminder.ReminderScheduler
+import com.reverigma.mementideplus.ui.components.GlassCard
 import com.reverigma.mementideplus.ui.components.glassBackgroundBrush
 import com.reverigma.mementideplus.util.DateUtils
 import java.io.File
@@ -155,12 +156,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // 外观
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text("外观", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(14.dp))
@@ -189,12 +185,7 @@ fun SettingsScreen(
             }
 
             // 应用锁
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
@@ -229,12 +220,7 @@ fun SettingsScreen(
             }
 
             // 每日提醒
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
@@ -287,12 +273,7 @@ fun SettingsScreen(
             }
 
             // 高级模式
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
@@ -313,12 +294,7 @@ fun SettingsScreen(
             }
 
             // 统计页视图
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text("统计页视图", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(4.dp))
@@ -408,12 +384,7 @@ fun SettingsScreen(
             }
 
             // 海报预览
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
@@ -435,12 +406,7 @@ fun SettingsScreen(
 
             // 检查更新
             val updateState by viewModel.updateState.collectAsState()
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
@@ -504,12 +470,7 @@ fun SettingsScreen(
             }
 
             // 数据备份
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text("数据备份", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))

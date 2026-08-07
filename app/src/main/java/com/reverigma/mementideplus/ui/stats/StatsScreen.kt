@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.collectAsState
+import com.reverigma.mementideplus.ui.components.GlassCard
 import com.reverigma.mementideplus.ui.components.glassBackgroundBrush
 import com.reverigma.mementideplus.util.DateUtils
 @Composable
@@ -110,12 +111,7 @@ fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
             views.forEach { v ->
                 when (v) {
                     "month" -> item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                        ) {
+                        GlassCard(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.padding(20.dp)) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -151,12 +147,7 @@ fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
                         }
                     }
                     "heatmap" -> item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                        ) {
+                        GlassCard(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.padding(20.dp)) {
                                 Text(
                                     "近 18 周打卡密度",
@@ -226,12 +217,7 @@ private fun SummaryCard(
     unit: String = "",
     color: Color
 ) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
+    GlassCard(modifier = modifier) {
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally

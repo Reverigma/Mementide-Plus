@@ -47,11 +47,12 @@ private val InverseOnSurface = Color(0xFFF4EFF4)
 private val InversePrimary = Color(0xFFC7D2FE)
 private val SurfaceTint = Primary
 
-private val SurfaceContainerLowest = Color(0xCCFFFFFF)  // 80% 白玻璃
-private val SurfaceContainerLow = Color(0x8CFFFFFF)     // 55% 白玻璃（卡片）
-private val SurfaceContainer = Color(0x73FFFFFF)        // 45% 白玻璃（导航栏）
-private val SurfaceContainerHigh = Color(0x99FFFFFF)    // 60%
-private val SurfaceContainerHighest = Color(0xB3FFFFFF) // 70%
+// 容器色恢复为不透明常规色（卡片玻璃效果由专用 GlassCard 组件实现；surface 保留半透明供顶栏/导航栏）
+private val SurfaceContainerLowest = Color(0xFFFFFFFF)
+private val SurfaceContainerLow = Color(0xFFF8F9FB)
+private val SurfaceContainer = Color(0xFFF2F4F7)
+private val SurfaceContainerHigh = Color(0xFFECEEF2)
+private val SurfaceContainerHighest = Color(0xFFE5E7EB)
 
 private val DarkPrimary = Color(0xFFC7D2FE)
 private val DarkOnPrimary = Color(0xFF312E81)
@@ -73,7 +74,7 @@ private val DarkOnError = Color(0xFF690005)
 private val DarkErrorContainer = Color(0xFF93000A)
 private val DarkOnErrorContainer = Color(0xFFFFDAD6)
 
-// 深色玻璃：背景暗蓝紫（页面渐变），容器为极低透明度白玻璃
+// 深色背景暗蓝紫（页面渐变），surface 半透明供顶栏/导航栏
 private val DarkBackground = Color(0xFF101827)
 private val DarkOnBackground = Color(0xFFE5E1E6)
 private val DarkSurface = Color(0x59000000)          // 暗色半透明（顶栏/导航栏）
@@ -87,11 +88,12 @@ private val DarkInverseOnSurface = Color(0xFF313033)
 private val DarkInversePrimary = Color(0xFF4F46E5)
 private val DarkSurfaceTint = DarkPrimary
 
-private val DarkSurfaceContainerLowest = Color(0xFF0B1220)   // 比背景略深
-private val DarkSurfaceContainerLow = Color(0x14FFFFFF)      // 8% 白玻璃（卡片）
-private val DarkSurfaceContainer = Color(0x0FFFFFFF)         // 6% 白玻璃（导航栏）
-private val DarkSurfaceContainerHigh = Color(0x1AFFFFFF)     // 10%
-private val DarkSurfaceContainerHighest = Color(0x24FFFFFF)  // 14%
+// 深色容器恢复不透明常规色（卡片玻璃由 GlassCard 实现）
+private val DarkSurfaceContainerLowest = Color(0xFF141318)
+private val DarkSurfaceContainerLow = Color(0xFF1C1B1F)
+private val DarkSurfaceContainer = Color(0xFF2B2930)
+private val DarkSurfaceContainerHigh = Color(0xFF36343B)
+private val DarkSurfaceContainerHighest = Color(0xFF413F47)
 
 private val LightColorScheme = lightColorScheme(
     primary = Primary,
