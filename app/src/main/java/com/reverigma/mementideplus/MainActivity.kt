@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,6 +45,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
+import com.reverigma.mementideplus.ui.components.glassBackgroundModifier
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.reverigma.mementideplus.ui.anniversary.AddAnniversaryDialog
@@ -103,9 +105,15 @@ class MainActivity : ComponentActivity() {
                     return@MementideTheme
                 }
 
+                // 全局唯一背景层：Pager 翻页时背景连续不拼接，页面内容浮在其上滑动
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .then(glassBackgroundModifier())
+                ) {
                 Scaffold(
-                    // 容器用不透明背景色（页面渐变盖住主体；导航栏半透明玻璃透出的是它而非黑窗）
-                    containerColor = MaterialTheme.colorScheme.background,
+                    // 页面透明，露出全局背景层
+                    containerColor = Color.Transparent,
                     bottomBar = {
                         NavigationBar(
                             // 玻璃导航栏：半透明 + 零阴影（顶部不加线，避免出现"小边"）
@@ -199,10 +207,11 @@ class MainActivity : ComponentActivity() {
                             0 -> HomeScreen(homeVm, Modifier.fillMaxSize(), onAddHabit = { showAddHabit = true })
                             1 -> AnniversaryScreen(anniVm, Modifier.fillMaxSize(), onAddAnniversary = { showAddAnni = true })
                             2 -> StatsScreen(statsVm, Modifier.fillMaxSize())
-                            3 -> SettingsScreen(settingsVm, Modifier.fillMaxSize())
+                                3 -> SettingsScreen(settingsVm, Modifier.fillMaxSize())
                         }
                     }
                 }
+                }   // 全局背景 Box 闭合
 
                 if (showAddHabit) {
                     AddHabitDialog(

@@ -77,7 +77,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Habit
-import com.reverigma.mementideplus.ui.components.GlassBackground
 import com.reverigma.mementideplus.ui.components.GlassCard
 import com.reverigma.mementideplus.ui.components.HabitIcon
 import com.reverigma.mementideplus.ui.components.PosterDialog
@@ -102,12 +101,11 @@ fun HomeScreen(
     var habitToDelete by remember { mutableStateOf<Habit?>(null) }
     var habitPoster by remember { mutableStateOf<HabitItem?>(null) }
 
-    GlassBackground(modifier = modifier) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            val barLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
-                Color(0x26FFFFFF) else Color(0x4DFFFFFF)
-            TopAppBar(
-                title = { Text("今日") },
+    Column(modifier = modifier.fillMaxSize()) {
+        val barLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
+            Color(0x26FFFFFF) else Color(0x4DFFFFFF)
+        TopAppBar(
+            title = { Text("今日") },
                 modifier = Modifier.drawBehind {
                     drawLine(barLine, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
                 },
@@ -154,7 +152,6 @@ fun HomeScreen(
                     )
                 }
             }
-        }
         }
     }
 

@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.collectAsState
 import com.reverigma.mementideplus.ui.components.GlassCard
-import com.reverigma.mementideplus.ui.components.glassBackgroundModifier
 import com.reverigma.mementideplus.util.DateUtils
 @Composable
 fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
@@ -70,9 +69,7 @@ fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
         if (showHeat) add("heatmap")
     }.sortedWith(compareBy { viewOrder.split(",").indexOf(it).let { i -> if (i < 0) Int.MAX_VALUE else i } })
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .then(glassBackgroundModifier())
+        modifier = modifier.fillMaxSize()
     ) {
         val barLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
             Color(0x26FFFFFF) else Color(0x4DFFFFFF)

@@ -62,7 +62,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Anniversary
-import com.reverigma.mementideplus.ui.components.GlassBackground
 import com.reverigma.mementideplus.ui.components.GlassCard
 import com.reverigma.mementideplus.ui.components.HabitIcon
 import com.reverigma.mementideplus.ui.components.PosterDialog
@@ -86,12 +85,11 @@ fun AnniversaryScreen(
     var toEdit by remember { mutableStateOf<Anniversary?>(null) }
     var posterItem by remember { mutableStateOf<AnniversaryItem?>(null) }
 
-    GlassBackground(modifier = modifier) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            val barLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
-                Color(0x26FFFFFF) else Color(0x4DFFFFFF)
-            TopAppBar(
-                title = { Text("纪念日") },
+    Column(modifier = modifier.fillMaxSize()) {
+        val barLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
+            Color(0x26FFFFFF) else Color(0x4DFFFFFF)
+        TopAppBar(
+            title = { Text("纪念日") },
                 modifier = Modifier.drawBehind {
                     drawLine(barLine, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
                 },
@@ -120,7 +118,6 @@ fun AnniversaryScreen(
                     )
                 }
             }
-        }
         }
     }
 
