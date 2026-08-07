@@ -69,7 +69,7 @@ import android.provider.Settings
 import com.reverigma.mementideplus.BuildConfig
 import com.reverigma.mementideplus.reminder.ReminderScheduler
 import com.reverigma.mementideplus.ui.components.GlassCard
-import com.reverigma.mementideplus.ui.components.glassBackgroundBrush
+import com.reverigma.mementideplus.ui.components.glassBackgroundModifier
 import com.reverigma.mementideplus.util.DateUtils
 import java.io.File
 import kotlinx.coroutines.launch
@@ -143,7 +143,7 @@ fun SettingsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(glassBackgroundBrush())
+            .then(glassBackgroundModifier())
     ) {
         val barLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
             Color(0x26FFFFFF) else Color(0x4DFFFFFF)
