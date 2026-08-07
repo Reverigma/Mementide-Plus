@@ -32,18 +32,18 @@ fun GlassCard(
     content: @Composable BoxScope.() -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-    // 玻璃底：顶部亮 → 底部微暗（几乎不透明，与背景拉开层次；不做全透明"融化"以免和浅背景糊在一起）
+    // 白毛玻璃底：顶部亮 → 底部微暗（浅色 90%+ 白，深色白玻璃）
     val glass = if (isDark) {
         Brush.verticalGradient(
-            0f to Color(0x38FFFFFF),   // 顶部 22% 白
-            0.55f to Color(0x24FFFFFF), // 中部 14%
+            0f to Color(0x30FFFFFF),   // 顶部 19% 白
+            0.55f to Color(0x22FFFFFF), // 中部 13%
             1f to Color(0x1AFFFFFF)     // 底部 10%
         )
     } else {
         Brush.verticalGradient(
-            0f to Color(0xF7FFFFFF),   // 顶部 97% 白（几乎实白）
-            0.55f to Color(0xEBFFFFFF), // 中部 92%
-            1f to Color(0xDEFFFFFF)     // 底部 87%
+            0f to Color(0xFBFFFFFF),   // 顶部 98% 白
+            0.55f to Color(0xF0FFFFFF), // 中部 94%
+            1f to Color(0xE4FFFFFF)     // 底部 89%
         )
     }
     // 内高光光带：卡片上沿一道亮白渐变
@@ -70,7 +70,7 @@ fun GlassCard(
             listOf(Color(0xFFFFFFFF), Color(0xB3FFFFFF), Color(0x33FFFFFF))
         )
     }
-    val shadowColor = if (isDark) Color(0x50000000) else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+    val shadowColor = if (isDark) Color(0x50000000) else Color(0x1E64748B) // 浅色用中性蓝灰阴影，不用紫色光晕
 
     Box(
         modifier = modifier

@@ -33,12 +33,12 @@ private val OnError = Color(0xFFFFFFFF)
 private val ErrorContainer = Color(0xFFFFE4E6)
 private val OnErrorContainer = Color(0xFF991B1B)
 
-// 浅色玻璃：背景近白（页面渐变在其上），容器为不同透明度的白玻璃
-private val Background = Color(0xFFF6F7FB)
+// 白透风格（浅色）：背景纯白系，surface 为白色毛玻璃（顶栏/导航栏），文字深灰保证对比
+private val Background = Color(0xFFFAFBFE)
 private val OnBackground = Color(0xFF1C1B1F)
-private val Surface = Color(0x99FFFFFF)          // 60% 白玻璃（顶栏/导航栏）
+private val Surface = Color(0xD9FFFFFF)          // 85% 白玻璃（顶栏/导航栏，白透不露黑窗）
 private val OnSurface = Color(0xFF1C1B1F)
-private val SurfaceVariant = Color(0x80FFFFFF)   // 50% 白玻璃
+private val SurfaceVariant = Color(0xF2FFFFFF)   // 95% 白玻璃
 private val OnSurfaceVariant = Color(0xFF5A6072)
 private val Outline = Color(0xFFE5E7EB)
 private val OutlineVariant = Color(0xFFF3F4F6)
@@ -47,7 +47,7 @@ private val InverseOnSurface = Color(0xFFF4EFF4)
 private val InversePrimary = Color(0xFFC7D2FE)
 private val SurfaceTint = Primary
 
-// 容器色恢复为不透明常规色（卡片玻璃效果由专用 GlassCard 组件实现；surface 保留半透明供顶栏/导航栏）
+// 容器色：白系常规色（卡片玻璃由 GlassCard 实现，其余组件白底深字）
 private val SurfaceContainerLowest = Color(0xFFFFFFFF)
 private val SurfaceContainerLow = Color(0xFFF8F9FB)
 private val SurfaceContainer = Color(0xFFF2F4F7)
@@ -74,10 +74,10 @@ private val DarkOnError = Color(0xFF690005)
 private val DarkErrorContainer = Color(0xFF93000A)
 private val DarkOnErrorContainer = Color(0xFFFFDAD6)
 
-// 深色背景暗蓝紫（页面渐变），surface 半透明供顶栏/导航栏
-private val DarkBackground = Color(0xFF101827)
+// 白透风格（深色）：背景深灰（不彩），surface 为暗色玻璃（顶栏/导航栏）
+private val DarkBackground = Color(0xFF14151A)
 private val DarkOnBackground = Color(0xFFE5E1E6)
-private val DarkSurface = Color(0x59000000)          // 暗色半透明（顶栏/导航栏）
+private val DarkSurface = Color(0x73000000)          // 45% 暗玻璃
 private val DarkOnSurface = Color(0xFFE5E1E6)
 private val DarkSurfaceVariant = Color(0x14FFFFFF)   // 8% 白玻璃
 private val DarkOnSurfaceVariant = Color(0xFF9CA3AF)
@@ -88,12 +88,12 @@ private val DarkInverseOnSurface = Color(0xFF313033)
 private val DarkInversePrimary = Color(0xFF4F46E5)
 private val DarkSurfaceTint = DarkPrimary
 
-// 深色容器恢复不透明常规色（卡片玻璃由 GlassCard 实现）
-private val DarkSurfaceContainerLowest = Color(0xFF141318)
-private val DarkSurfaceContainerLow = Color(0xFF1C1B1F)
-private val DarkSurfaceContainer = Color(0xFF2B2930)
-private val DarkSurfaceContainerHigh = Color(0xFF36343B)
-private val DarkSurfaceContainerHighest = Color(0xFF413F47)
+// 深色容器：深灰常规色（卡片玻璃由 GlassCard 实现）
+private val DarkSurfaceContainerLowest = Color(0xFF0E0F13)
+private val DarkSurfaceContainerLow = Color(0xFF1C1D22)
+private val DarkSurfaceContainer = Color(0xFF2A2C31)
+private val DarkSurfaceContainerHigh = Color(0xFF35373C)
+private val DarkSurfaceContainerHighest = Color(0xFF404247)
 
 private val LightColorScheme = lightColorScheme(
     primary = Primary,

@@ -23,12 +23,14 @@ import androidx.compose.ui.graphics.luminance
 fun glassBackgroundBrush(): Brush {
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     return if (isDark) {
+        // 深色白透：深灰 → 微冷深灰（不彩）
         Brush.verticalGradient(
-            listOf(Color(0xFF25324F), Color(0xFF141B33), Color(0xFF241538))
+            listOf(Color(0xFF1A1C22), Color(0xFF14151A), Color(0xFF1C181E))
         )
     } else {
+        // 白透：纯白 → 微冷白 → 微暖白（不彩，只有极淡的冷暖倾向）
         Brush.verticalGradient(
-            listOf(Color(0xFFD5E0FF), Color(0xFFF3F5FF), Color(0xFFFBE3F1))
+            listOf(Color(0xFFFFFFFF), Color(0xFFF7F9FF), Color(0xFFFFFCF8))
         )
     }
 }
@@ -44,19 +46,16 @@ private data class Glow(
 @Composable
 private fun glows(isDark: Boolean): List<Glow> = if (isDark) {
     listOf(
-        Glow(0.15f, -0.05f, Color(0x30256BB3), 900f),  // 靛蓝天光
-        Glow(0.95f, 0.25f, Color(0x2E7C3AED), 800f),   // 紫光
-        Glow(-0.1f, 0.75f, Color(0x260EA5E9), 840f),   // 青光
-        Glow(1.05f, 1.05f, Color(0x2CDB2777), 760f),   // 粉光
-        Glow(0.5f, 1.1f, Color(0x28C026D3), 720f)      // 品红光
+        Glow(0.15f, -0.05f, Color(0x14FFFFFF), 900f),  // 白色天光
+        Glow(0.95f, 0.25f, Color(0x0FFFFFFF), 800f),
+        Glow(0.5f, 1.1f, Color(0x0CFFFFFF), 720f)
     )
 } else {
+    // 白透：全部用极淡的白色光晕（模拟天光漫射），不引入彩色
     listOf(
-        Glow(0.12f, -0.08f, Color(0x284F46E5), 900f),  // 靛蓝
-        Glow(1.0f, 0.2f, Color(0x208B5CF6), 760f),     // 紫
-        Glow(-0.05f, 0.7f, Color(0x200EA5E9), 800f),   // 蓝
-        Glow(1.02f, 1.0f, Color(0x1EF472B6), 700f),    // 粉
-        Glow(0.45f, 1.12f, Color(0x1EF59E0B), 680f)    // 暖橙
+        Glow(0.12f, -0.08f, Color(0x33FFFFFF), 900f),  // 白亮光晕
+        Glow(1.0f, 0.2f, Color(0x26FFFFFF), 800f),
+        Glow(0.5f, 1.1f, Color(0x1AFFFFFF), 720f)
     )
 }
 
