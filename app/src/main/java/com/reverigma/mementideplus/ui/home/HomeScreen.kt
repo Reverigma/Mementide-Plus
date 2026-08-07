@@ -105,6 +105,9 @@ fun HomeScreen(
                 scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
             )
         )
+        // 列表入场动画：仅页面首次组合（冷启动）播放一次，滚动/切页回来不重播
+        var listEntered by rememberSaveable { mutableStateOf(false) }
+        LaunchedEffect(Unit) { listEntered = true }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 16.dp),
@@ -127,15 +130,12 @@ fun HomeScreen(
                 item { EmptyHabits(onAdd = onAddHabit) }
             } else {
                 itemsIndexed(state.items, key = { _, item -> item.habit.id }) { index, item ->
-                    // 入场动画：依次淡入 + 轻微上移
-                    var entered by rememberSaveable(item.habit.id) { mutableStateOf(false) }
-                    LaunchedEffect(Unit) { entered = true }
                     AnimatedVisibility(
-                        visible = entered,
-                        enter = fadeIn(animationSpec = tween(320, delayMillis = index * 45)) +
+                        visible = listEntered,
+                        enter = fadeIn(animationSpec = tween(400, delayMillis = index * 50)) +
                             slideInVertically(
-                                animationSpec = tween(320, delayMillis = index * 45),
-                                initialOffsetY = { it / 5 }
+                                animationSpec = tween(400, delayMillis = index * 50),
+                                initialOffsetY = { it / 3 }
                             )
                     ) {
                         HabitCard(
@@ -355,14 +355,17 @@ private fun HabitCard(
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
         label = "cardScale"
     )
-    // 打卡弹跳：刚勾选时 emoji 短暂放大回弹
+    // 打卡弹跳：只在「本次组合期间由未打卡变为已打卡」时触发一次。
+    // lastDone 记录上一个状态；切页/滚动回来重新组合时 lastDone 初始为当前值，不会误弹。
     val popScale = remember { Animatable(1f) }
+    var lastDone by remember { mutableStateOf(item.doneToday) }
     LaunchedEffect(item.doneToday) {
-        if (item.doneToday) {
+        if (item.doneToday && !lastDone) {
             popScale.snapTo(1f)
             popScale.animateTo(1.25f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessHigh))
             popScale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
         }
+        lastDone = item.doneToday
     }
     Card(
         modifier = Modifier

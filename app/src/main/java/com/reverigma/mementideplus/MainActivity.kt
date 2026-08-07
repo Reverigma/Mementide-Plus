@@ -102,8 +102,9 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     bottomBar = {
                         NavigationBar(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            tonalElevation = NavigationBarDefaults.Elevation
+                            // 与页面背景同色 + 零阴影，避免导航栏上方出现一条缝/阴影线
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            tonalElevation = 0.dp
                         ) {
                             // 选中态用主色（靛蓝），取代默认的 secondaryContainer（蓝绿）
                             val navColors = NavigationBarItemDefaults.colors(

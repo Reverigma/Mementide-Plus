@@ -89,6 +89,9 @@ fun AnniversaryScreen(
                 scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
             )
         )
+        // 列表入场动画：仅页面首次组合（冷启动）播放一次，滚动/切页回来不重播
+        var listEntered by rememberSaveable { mutableStateOf(false) }
+        LaunchedEffect(Unit) { listEntered = true }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 16.dp),
@@ -98,14 +101,12 @@ fun AnniversaryScreen(
                 item { EmptyAnniversaries(onAdd = onAddAnniversary) }
             } else {
                 itemsIndexed(state.items, key = { _, item -> item.anniversary.id }) { index, item ->
-                    var entered by rememberSaveable(item.anniversary.id) { mutableStateOf(false) }
-                    LaunchedEffect(Unit) { entered = true }
                     AnimatedVisibility(
-                        visible = entered,
-                        enter = fadeIn(animationSpec = tween(320, delayMillis = index * 45)) +
+                        visible = listEntered,
+                        enter = fadeIn(animationSpec = tween(400, delayMillis = index * 50)) +
                             slideInVertically(
-                                animationSpec = tween(320, delayMillis = index * 45),
-                                initialOffsetY = { it / 5 }
+                                animationSpec = tween(400, delayMillis = index * 50),
+                                initialOffsetY = { it / 3 }
                             )
                     ) {
                         AnniversaryCard(
