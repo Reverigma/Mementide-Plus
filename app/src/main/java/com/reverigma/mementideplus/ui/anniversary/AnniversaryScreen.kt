@@ -85,14 +85,28 @@ fun AnniversaryScreen(
     var toEdit by remember { mutableStateOf<Anniversary?>(null) }
     var posterItem by remember { mutableStateOf<AnniversaryItem?>(null) }
 
-    // 列表（顶栏为全局覆盖层，此处只留内容；顶部留出覆盖栏高度）
+    // 列表：标题在内容流内（不占额外区域、不遮挡），底部给悬浮 Dock 留出可视空间
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(
-            start = 20.dp, end = 20.dp, top = 80.dp, bottom = 110.dp
+            start = 20.dp, end = 20.dp, top = 16.dp, bottom = 100.dp
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+            item {
+                Text(
+                    "纪念日",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "重要的日子，记得庆祝",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(16.dp))
+            }
             if (state.items.isEmpty()) {
                 item { EmptyAnniversaries(onAdd = onAddAnniversary) }
             } else {

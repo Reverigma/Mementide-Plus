@@ -122,37 +122,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-                // 覆盖层：顶部玻璃栏 + 悬浮 Dock + FAB（浮在内容之上，内容滚动从玻璃下方穿过）
+                // 覆盖层：只留悬浮 Dock + FAB（标题已回归各页内容流，不占额外区域、不遮挡内容）
                 Box(Modifier.fillMaxSize()) {
-                    // 顶部玻璃栏（标题按当前页）
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .statusBarsPadding()
-                            .height(56.dp)
-                            .background(
-                                if (isDark) Color(0x8C14151A) else Color(0xE6FFFFFF)
-                            )
-                            .drawBehind {
-                                val line = if (isDark) Color(0x26FFFFFF) else Color(0x4DFFFFFF)
-                                drawLine(line, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
-                            }
-                            .align(Alignment.TopCenter)
-                    ) {
-                        Text(
-                            when (selected) {
-                                0 -> "今日"
-                                1 -> "纪念日"
-                                2 -> "统计"
-                                else -> "设置"
-                            },
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier
-                                .align(Alignment.CenterStart)
-                                .padding(horizontal = 20.dp)
-                        )
-                    }
                     // FAB（在 Dock 上方）
                     if (selected != 2 && selected != 3) {
                         FloatingActionButton(

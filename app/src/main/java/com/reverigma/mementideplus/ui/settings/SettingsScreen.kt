@@ -142,14 +142,26 @@ fun SettingsScreen(
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        // 顶栏为全局覆盖层；此处只留内容（顶部留出覆盖栏高度）
+        // 标题在内容流内（不占额外区域、不遮挡），底部给悬浮 Dock 留出可视空间
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 20.dp, end = 20.dp, top = 80.dp, bottom = 110.dp)
+                .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 100.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Text(
+                "设置",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "个性化你的 Mementide Plus",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(12.dp))
             // 外观
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(20.dp)) {

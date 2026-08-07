@@ -71,14 +71,28 @@ fun StatsScreen(viewModel: StatsViewModel, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        // 顶栏为全局覆盖层；此处只留内容（顶部留出覆盖栏高度）
+        // 标题在内容流内（不占额外区域、不遮挡），底部给悬浮 Dock 留出可视空间
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = 20.dp, end = 20.dp, top = 80.dp, bottom = 110.dp
+                start = 20.dp, end = 20.dp, top = 16.dp, bottom = 100.dp
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item {
+                Text(
+                    "统计",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "坚持的痕迹",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(16.dp))
+            }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     SummaryCard(
