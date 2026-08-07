@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,15 +13,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +43,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.reverigma.mementideplus.data.model.Anniversary
 import com.reverigma.mementideplus.data.model.CALENDAR_LUNAR
@@ -45,6 +52,7 @@ import com.reverigma.mementideplus.data.model.CALENDAR_SOLAR
 import com.reverigma.mementideplus.data.model.REPEAT_MONTHLY
 import com.reverigma.mementideplus.data.model.REPEAT_NONE
 import com.reverigma.mementideplus.data.model.REPEAT_YEARLY
+import com.reverigma.mementideplus.ui.components.ColorPickerRow
 import com.reverigma.mementideplus.ui.components.IconPicker
 import com.reverigma.mementideplus.ui.home.ImagePickRow
 import com.reverigma.mementideplus.util.DateUtils
@@ -72,6 +80,7 @@ fun AddAnniversaryDialog(
     var showPicker by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
             ImageStore.saveFromUri(context, uri, "anniversary_images")?.let { newPath ->
@@ -85,8 +94,9 @@ fun AddAnniversaryDialog(
         0xFFE11D48, 0xFF4F46E5, 0xFF0EA5E9, 0xFF10B981,
         0xFFF59E0B, 0xFFEF4444, 0xFF8B5CF6, 0xFFEC4899
     ).map { it.toInt() }
-    val lunarMonths = (1..12).toList()
-    val lunarDays = (1..30).toList()
+    // 农历月/日下拉展开状态
+    var lunarMonthMenu by remember { mutableStateOf(false) }
+    var lunarDayMenu by remember { mutableStateOf(false) }
 
     if (showPicker && calendarType == CALENDAR_SOLAR) {
         val state = rememberDatePickerState(initialSelectedDateMillis = DateUtils.epochMillisForDate(date))
@@ -108,13 +118,18 @@ fun AddAnniversaryDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (initial == null) "新建纪念日" else "编辑纪念日") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("名称") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
                 )
                 Text("历法", style = MaterialTheme.typography.labelMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -135,32 +150,11 @@ fun AddAnniversaryDialog(
                     onIconSelected = { iconName = it }
                 )
                 Text("颜色", style = MaterialTheme.typography.labelMedium)
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(colors) { c ->
-                        val isSelected = color == c
-                        Surface(
-                            onClick = { color = c },
-                            shape = CircleShape,
-                            color = Color(c),
-                            modifier = Modifier
-                                .size(36.dp)
-                                .border(
-                                    width = if (isSelected) 3.dp else 0.dp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
-                                    shape = CircleShape
-                                )
-                        ) {
-                            if (isSelected) {
-                                Icon(
-                                    Icons.Filled.Check,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
-                    }
-                }
+                ColorPickerRow(
+                    selected = color,
+                    colors = colors,
+                    onSelected = { color = it }
+                )
                 if (calendarType == CALENDAR_SOLAR) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("日期：${DateUtils.formatDate(date)}", style = MaterialTheme.typography.bodyMedium)
@@ -168,31 +162,46 @@ fun AddAnniversaryDialog(
                         TextButton(onClick = { showPicker = true }) { Text("选择日期") }
                     }
                 } else {
-                    Text("农历月", style = MaterialTheme.typography.labelMedium)
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        items(lunarMonths) { m ->
-                            FilterChip(
-                                selected = lunarMonth == m,
-                                onClick = { lunarMonth = m },
-                                label = { Text(LunarCalendar.lunarLabel(m, 1).substringBefore("月") + "月") }
-                            )
+                    // 农历月/日：紧凑下拉选择
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Box {
+                            TextButton(onClick = { lunarMonthMenu = true }) {
+                                Text(LunarCalendar.lunarLabel(lunarMonth, 1).substringBefore("月") + "月")
+                                Icon(Icons.Filled.ArrowDropDown, null, modifier = Modifier.size(18.dp))
+                            }
+                            DropdownMenu(expanded = lunarMonthMenu, onDismissRequest = { lunarMonthMenu = false }) {
+                                (1..12).forEach { m ->
+                                    DropdownMenuItem(
+                                        text = { Text(LunarCalendar.lunarLabel(m, 1).substringBefore("月") + "月") },
+                                        onClick = { lunarMonth = m; lunarMonthMenu = false }
+                                    )
+                                }
+                            }
                         }
-                    }
-                    Text("农历日", style = MaterialTheme.typography.labelMedium)
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        items(lunarDays) { d ->
-                            FilterChip(
-                                selected = lunarDay == d,
-                                onClick = { lunarDay = d },
-                                label = { Text(LunarCalendar.lunarLabel(1, d).substringAfter("月")) }
-                            )
+                        Box {
+                            TextButton(onClick = { lunarDayMenu = true }) {
+                                Text(LunarCalendar.lunarLabel(1, lunarDay).substringAfter("月"))
+                                Icon(Icons.Filled.ArrowDropDown, null, modifier = Modifier.size(18.dp))
+                            }
+                            DropdownMenu(expanded = lunarDayMenu, onDismissRequest = { lunarDayMenu = false }) {
+                                (1..30).forEach { d ->
+                                    DropdownMenuItem(
+                                        text = { Text(LunarCalendar.lunarLabel(1, d).substringAfter("月")) },
+                                        onClick = { lunarDay = d; lunarDayMenu = false }
+                                    )
+                                }
+                            }
                         }
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            LunarCalendar.lunarLabel(lunarMonth, lunarDay),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
-                    Text(
-                        "已选：${LunarCalendar.lunarLabel(lunarMonth, lunarDay)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
                 Text("重复", style = MaterialTheme.typography.labelMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -205,7 +214,9 @@ fun AddAnniversaryDialog(
                     onValueChange = { note = it },
                     label = { Text("备注（可选）") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
                 )
                 ImagePickRow(
                     imagePath = imagePath,

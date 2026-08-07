@@ -14,10 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
@@ -40,8 +41,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.reverigma.mementideplus.data.model.Habit
+import com.reverigma.mementideplus.ui.components.ColorPickerRow
 import com.reverigma.mementideplus.ui.components.IconPicker
 import com.reverigma.mementideplus.util.ImageStore
 
@@ -63,6 +67,7 @@ fun AddHabitDialog(
     ).map { it.toInt() }
 
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
             ImageStore.saveFromUri(context, uri, "habit_images")?.let { newPath ->
@@ -76,13 +81,18 @@ fun AddHabitDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (initial == null) "新建习惯" else "编辑习惯") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("名称") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
                 )
                 Text("图标", style = MaterialTheme.typography.labelMedium)
                 IconPicker(
@@ -90,32 +100,11 @@ fun AddHabitDialog(
                     onIconSelected = { iconName = it }
                 )
                 Text("颜色", style = MaterialTheme.typography.labelMedium)
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(colors) { c ->
-                        val isSelected = color == c
-                        Surface(
-                            onClick = { color = c },
-                            shape = CircleShape,
-                            color = Color(c),
-                            modifier = Modifier
-                                .size(36.dp)
-                                .border(
-                                    width = if (isSelected) 3.dp else 0.dp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
-                                    shape = CircleShape
-                                )
-                        ) {
-                            if (isSelected) {
-                                Icon(
-                                    Icons.Filled.Check,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
-                    }
-                }
+                ColorPickerRow(
+                    selected = color,
+                    colors = colors,
+                    onSelected = { color = it }
+                )
                 ImagePickRow(
                     imagePath = imagePath,
                     onPick = { imagePicker.launch("image/*") },
