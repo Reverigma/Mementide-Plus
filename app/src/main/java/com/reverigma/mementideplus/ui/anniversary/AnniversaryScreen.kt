@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Anniversary
+import com.reverigma.mementideplus.ui.components.GlassBackground
 import com.reverigma.mementideplus.ui.components.HabitIcon
 import com.reverigma.mementideplus.ui.components.PosterDialog
 import com.reverigma.mementideplus.util.AchievementCardGenerator
@@ -81,14 +82,15 @@ fun AnniversaryScreen(
     var toEdit by remember { mutableStateOf<Anniversary?>(null) }
     var posterItem by remember { mutableStateOf<AnniversaryItem?>(null) }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("纪念日") },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+    GlassBackground(modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                title = { Text("纪念日") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
-        )
         // 列表（无入场动画，简洁直接）
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -109,6 +111,7 @@ fun AnniversaryScreen(
                     )
                 }
             }
+        }
         }
     }
 

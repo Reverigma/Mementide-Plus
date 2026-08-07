@@ -74,6 +74,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.reverigma.mementideplus.data.model.Habit
+import com.reverigma.mementideplus.ui.components.GlassBackground
 import com.reverigma.mementideplus.ui.components.HabitIcon
 import com.reverigma.mementideplus.ui.components.PosterDialog
 import com.reverigma.mementideplus.ui.home.dialogs.BackfillDateDialog
@@ -97,14 +98,15 @@ fun HomeScreen(
     var habitToDelete by remember { mutableStateOf<Habit?>(null) }
     var habitPoster by remember { mutableStateOf<HabitItem?>(null) }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("今日") },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+    GlassBackground(modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                title = { Text("今日") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
-        )
         // 列表（无入场动画，简洁直接）
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -143,6 +145,7 @@ fun HomeScreen(
                     )
                 }
             }
+        }
         }
     }
 

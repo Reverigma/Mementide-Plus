@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
@@ -62,6 +64,7 @@ import android.content.Intent
 import android.provider.Settings
 import com.reverigma.mementideplus.BuildConfig
 import com.reverigma.mementideplus.reminder.ReminderScheduler
+import com.reverigma.mementideplus.ui.components.glassBackgroundBrush
 import com.reverigma.mementideplus.util.DateUtils
 import java.io.File
 import kotlinx.coroutines.launch
@@ -132,12 +135,16 @@ fun SettingsScreen(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(glassBackgroundBrush())
+    ) {
         TopAppBar(
             title = { Text("设置") },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                containerColor = Color.Transparent,
+                scrolledContainerColor = MaterialTheme.colorScheme.surface
             )
         )
         Column(

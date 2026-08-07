@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 /*
- * 苹果风格 M3 色板：柔和、低饱和、层次分明。
- * 主色靛蓝，secondary 蓝绿，tertiary 粉紫，error 柔和红。
- * 暗色模式用深灰（#1C1B1F）而非纯黑，保护 OLED 且更有质感。
+ * 液态玻璃（Liquid Glass）风 M3 色板：
+ * - 主色靛蓝，容器色一律半透明白（浅色）/ 极低透明度白玻璃（深色），配合页面渐变背景形成玻璃质感
+ * - 文本色保持高对比，保证半透明玻璃上可读
  */
 
 private val Primary = Color(0xFF4F46E5)
@@ -33,12 +33,13 @@ private val OnError = Color(0xFFFFFFFF)
 private val ErrorContainer = Color(0xFFFFE4E6)
 private val OnErrorContainer = Color(0xFF991B1B)
 
-private val Background = Color(0xFFFEFEFE)
+// 浅色玻璃：背景近白（页面渐变在其上），容器为不同透明度的白玻璃
+private val Background = Color(0xFFF6F7FB)
 private val OnBackground = Color(0xFF1C1B1F)
-private val Surface = Color(0xFFFEFEFE)
+private val Surface = Color(0x99FFFFFF)          // 60% 白玻璃（顶栏/导航栏）
 private val OnSurface = Color(0xFF1C1B1F)
-private val SurfaceVariant = Color(0xFFF2F4F7)
-private val OnSurfaceVariant = Color(0xFF6B7280)
+private val SurfaceVariant = Color(0x80FFFFFF)   // 50% 白玻璃
+private val OnSurfaceVariant = Color(0xFF5A6072)
 private val Outline = Color(0xFFE5E7EB)
 private val OutlineVariant = Color(0xFFF3F4F6)
 private val InverseSurface = Color(0xFF313033)
@@ -46,11 +47,11 @@ private val InverseOnSurface = Color(0xFFF4EFF4)
 private val InversePrimary = Color(0xFFC7D2FE)
 private val SurfaceTint = Primary
 
-private val SurfaceContainerLowest = Color(0xFFFFFFFF)
-private val SurfaceContainerLow = Color(0xFFF8F9FB)
-private val SurfaceContainer = Color(0xFFF2F4F7)
-private val SurfaceContainerHigh = Color(0xFFECEEF2)
-private val SurfaceContainerHighest = Color(0xFFE5E7EB)
+private val SurfaceContainerLowest = Color(0xCCFFFFFF)  // 80% 白玻璃
+private val SurfaceContainerLow = Color(0x8CFFFFFF)     // 55% 白玻璃（卡片）
+private val SurfaceContainer = Color(0x73FFFFFF)        // 45% 白玻璃（导航栏）
+private val SurfaceContainerHigh = Color(0x99FFFFFF)    // 60%
+private val SurfaceContainerHighest = Color(0xB3FFFFFF) // 70%
 
 private val DarkPrimary = Color(0xFFC7D2FE)
 private val DarkOnPrimary = Color(0xFF312E81)
@@ -72,11 +73,12 @@ private val DarkOnError = Color(0xFF690005)
 private val DarkErrorContainer = Color(0xFF93000A)
 private val DarkOnErrorContainer = Color(0xFFFFDAD6)
 
-private val DarkBackground = Color(0xFF1C1B1F)
+// 深色玻璃：背景暗蓝紫（页面渐变），容器为极低透明度白玻璃
+private val DarkBackground = Color(0xFF101827)
 private val DarkOnBackground = Color(0xFFE5E1E6)
-private val DarkSurface = Color(0xFF1C1B1F)
+private val DarkSurface = Color(0x59000000)          // 暗色半透明（顶栏/导航栏）
 private val DarkOnSurface = Color(0xFFE5E1E6)
-private val DarkSurfaceVariant = Color(0xFF2B2930)
+private val DarkSurfaceVariant = Color(0x14FFFFFF)   // 8% 白玻璃
 private val DarkOnSurfaceVariant = Color(0xFF9CA3AF)
 private val DarkOutline = Color(0xFF4B5563)
 private val DarkOutlineVariant = Color(0xFF374151)
@@ -85,11 +87,11 @@ private val DarkInverseOnSurface = Color(0xFF313033)
 private val DarkInversePrimary = Color(0xFF4F46E5)
 private val DarkSurfaceTint = DarkPrimary
 
-private val DarkSurfaceContainerLowest = Color(0xFF141318)
-private val DarkSurfaceContainerLow = Color(0xFF1C1B1F)
-private val DarkSurfaceContainer = Color(0xFF2B2930)
-private val DarkSurfaceContainerHigh = Color(0xFF36343B)
-private val DarkSurfaceContainerHighest = Color(0xFF413F47)
+private val DarkSurfaceContainerLowest = Color(0xFF0B1220)   // 比背景略深
+private val DarkSurfaceContainerLow = Color(0x14FFFFFF)      // 8% 白玻璃（卡片）
+private val DarkSurfaceContainer = Color(0x0FFFFFFF)         // 6% 白玻璃（导航栏）
+private val DarkSurfaceContainerHigh = Color(0x1AFFFFFF)     // 10%
+private val DarkSurfaceContainerHighest = Color(0x24FFFFFF)  // 14%
 
 private val LightColorScheme = lightColorScheme(
     primary = Primary,

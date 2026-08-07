@@ -100,9 +100,11 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Scaffold(
+                    // 容器用不透明背景色（页面渐变盖住主体；导航栏半透明玻璃透出的是它而非黑窗）
+                    containerColor = MaterialTheme.colorScheme.background,
                     bottomBar = {
                         NavigationBar(
-                            // 与页面背景同色 + 零阴影，避免导航栏上方出现一条缝/阴影线
+                            // 玻璃导航栏：半透明 + 零阴影
                             containerColor = MaterialTheme.colorScheme.surface,
                             tonalElevation = 0.dp
                         ) {
