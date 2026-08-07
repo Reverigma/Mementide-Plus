@@ -101,13 +101,18 @@ fun AnniversaryScreen(
                 item { EmptyAnniversaries(onAdd = onAddAnniversary) }
             } else {
                 itemsIndexed(state.items, key = { _, item -> item.anniversary.id }) { index, item ->
-                    AnimatedVisibility(
-                        visible = listEntered,
-                        enter = fadeIn(animationSpec = tween(400, delayMillis = index * 50)) +
-                            slideInVertically(
-                                animationSpec = tween(400, delayMillis = index * 50),
-                                initialOffsetY = { it / 3 }
-                            )
+                    // 入场动画：页面级 listEntered 从 false→true 时，每张卡片按序淡入上浮。
+                    // 用 graphicsLayer 手写（比 AnimatedVisibility 稳定），滚动回收再组合时直接是终态不重播。
+                    val appear by animateFloatAsState(
+                        targetValue = if (listEntered) 1f else 0f,
+                        animationSpec = tween(450, delayMillis = index * 60),
+                        label = "cardAppear"
+                    )
+                    Box(
+                        modifier = Modifier.graphicsLayer {
+                            alpha = appear
+                            translationY = (1f - appear) * 28f.dp.toPx()
+                        }
                     ) {
                         AnniversaryCard(
                             item = item,
