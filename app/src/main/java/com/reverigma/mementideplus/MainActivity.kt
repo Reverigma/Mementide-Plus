@@ -14,22 +14,10 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Cake
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.Cake
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,6 +33,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
+import com.reverigma.mementideplus.ui.components.FloatingDock
 import com.reverigma.mementideplus.ui.components.glassBackgroundModifier
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -115,72 +104,10 @@ class MainActivity : ComponentActivity() {
                     // 页面透明，露出全局背景层
                     containerColor = Color.Transparent,
                     bottomBar = {
-                        NavigationBar(
-                            // 玻璃导航栏：半透明 + 零阴影（顶部不加线，避免出现"小边"）
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            tonalElevation = 0.dp
-                        ) {
-                            // 选中态用主色（靛蓝），取代默认的 secondaryContainer（蓝绿）
-                            val navColors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            NavigationBarItem(
-                                selected = selected == 0,
-                                onClick = { scope.launch { pagerState.scrollToPage(0) } },
-                                colors = navColors,
-                                icon = {
-                                    Icon(
-                                        imageVector = if (selected == 0) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
-                                        contentDescription = "今日",
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                },
-                                label = null
-                            )
-                            NavigationBarItem(
-                                selected = selected == 1,
-                                onClick = { scope.launch { pagerState.scrollToPage(1) } },
-                                colors = navColors,
-                                icon = {
-                                    Icon(
-                                        imageVector = if (selected == 1) Icons.Filled.Cake else Icons.Outlined.Cake,
-                                        contentDescription = "纪念日",
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                },
-                                label = null
-                            )
-                            NavigationBarItem(
-                                selected = selected == 2,
-                                onClick = { scope.launch { pagerState.scrollToPage(2) } },
-                                colors = navColors,
-                                icon = {
-                                    Icon(
-                                        imageVector = if (selected == 2) Icons.Filled.BarChart else Icons.Outlined.BarChart,
-                                        contentDescription = "统计",
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                },
-                                label = null
-                            )
-                            NavigationBarItem(
-                                selected = selected == 3,
-                                onClick = { scope.launch { pagerState.scrollToPage(3) } },
-                                colors = navColors,
-                                icon = {
-                                    Icon(
-                                        imageVector = if (selected == 3) Icons.Filled.Settings else Icons.Outlined.Settings,
-                                        contentDescription = "设置",
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                },
-                                label = null
-                            )
-                        }
+                        FloatingDock(
+                            selected = selected,
+                            onSelect = { scope.launch { pagerState.scrollToPage(it) } }
+                        )
                     },
                     floatingActionButton = {
                         if (selected != 2 && selected != 3) {
