@@ -24,11 +24,11 @@ fun glassBackgroundBrush(): Brush {
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     return if (isDark) {
         Brush.verticalGradient(
-            listOf(Color(0xFF1B2A4A), Color(0xFF101827), Color(0xFF1A1233))
+            listOf(Color(0xFF25324F), Color(0xFF141B33), Color(0xFF241538))
         )
     } else {
         Brush.verticalGradient(
-            listOf(Color(0xFFE4EBFF), Color(0xFFF7F8FF), Color(0xFFFFEEF7))
+            listOf(Color(0xFFD5E0FF), Color(0xFFF3F5FF), Color(0xFFFBE3F1))
         )
     }
 }

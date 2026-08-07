@@ -107,20 +107,10 @@ class MainActivity : ComponentActivity() {
                     // 容器用不透明背景色（页面渐变盖住主体；导航栏半透明玻璃透出的是它而非黑窗）
                     containerColor = MaterialTheme.colorScheme.background,
                     bottomBar = {
-                        val navLine = if (MaterialTheme.colorScheme.background.luminance() < 0.5f)
-                            Color(0x33FFFFFF) else Color(0x66FFFFFF)
                         NavigationBar(
-                            // 玻璃导航栏：半透明 + 零阴影 + 顶部高光细线（玻璃上沿反光）
+                            // 玻璃导航栏：半透明 + 零阴影（顶部不加线，避免出现"小边"）
                             containerColor = MaterialTheme.colorScheme.surface,
-                            tonalElevation = 0.dp,
-                            modifier = Modifier.drawBehind {
-                                drawLine(
-                                    color = navLine,
-                                    start = Offset(0f, 0f),
-                                    end = Offset(size.width, 0f),
-                                    strokeWidth = 1.dp.toPx()
-                                )
-                            }
+                            tonalElevation = 0.dp
                         ) {
                             // 选中态用主色（靛蓝），取代默认的 secondaryContainer（蓝绿）
                             val navColors = NavigationBarItemDefaults.colors(

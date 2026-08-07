@@ -32,18 +32,18 @@ fun GlassCard(
     content: @Composable BoxScope.() -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-    // 玻璃底：顶部亮 → 底部渐透明（融进背景）
+    // 玻璃底：顶部亮 → 底部微暗（几乎不透明，与背景拉开层次；不做全透明"融化"以免和浅背景糊在一起）
     val glass = if (isDark) {
         Brush.verticalGradient(
             0f to Color(0x38FFFFFF),   // 顶部 22% 白
-            0.55f to Color(0x1FFFFFFF), // 中部 12%
-            1f to Color(0x00FFFFFF)     // 底部全透明（融化）
+            0.55f to Color(0x24FFFFFF), // 中部 14%
+            1f to Color(0x1AFFFFFF)     // 底部 10%
         )
     } else {
         Brush.verticalGradient(
-            0f to Color(0xE8FFFFFF),   // 顶部 91% 白
-            0.55f to Color(0xD6FFFFFF), // 中部 84%
-            1f to Color(0x00FFFFFF)     // 底部全透明（融化）
+            0f to Color(0xF7FFFFFF),   // 顶部 97% 白（几乎实白）
+            0.55f to Color(0xEBFFFFFF), // 中部 92%
+            1f to Color(0xDEFFFFFF)     // 底部 87%
         )
     }
     // 内高光光带：卡片上沿一道亮白渐变
@@ -55,8 +55,8 @@ fun GlassCard(
         )
     } else {
         Brush.verticalGradient(
-            0f to Color(0x99FFFFFF),
-            0.25f to Color(0x30FFFFFF),
+            0f to Color(0xB3FFFFFF),
+            0.25f to Color(0x40FFFFFF),
             1f to Color(0x00FFFFFF)
         )
     }
