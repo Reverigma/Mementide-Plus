@@ -89,9 +89,7 @@ fun AnniversaryScreen(
                 scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
             )
         )
-        // 列表入场动画：仅页面首次组合（冷启动）播放一次，滚动/切页回来不重播
-        var listEntered by rememberSaveable { mutableStateOf(false) }
-        LaunchedEffect(Unit) { listEntered = true }
+        // 列表（无入场动画，简洁直接）
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 16.dp),
@@ -100,29 +98,15 @@ fun AnniversaryScreen(
             if (state.items.isEmpty()) {
                 item { EmptyAnniversaries(onAdd = onAddAnniversary) }
             } else {
-                itemsIndexed(state.items, key = { _, item -> item.anniversary.id }) { index, item ->
-                    // 入场动画：页面级 listEntered 从 false→true 时，每张卡片按序淡入上浮。
-                    // 用 graphicsLayer 手写（比 AnimatedVisibility 稳定），滚动回收再组合时直接是终态不重播。
-                    val appear by animateFloatAsState(
-                        targetValue = if (listEntered) 1f else 0f,
-                        animationSpec = tween(450, delayMillis = index * 60),
-                        label = "cardAppear"
+                items(state.items, key = { it.anniversary.id }) { item ->
+                    AnniversaryCard(
+                        item = item,
+                        showAdvanced = advancedMode,
+                        posterEnabled = posterTap,
+                        onPoster = { posterItem = item },
+                        onEdit = { toEdit = item.anniversary },
+                        onDelete = { toDelete = item.anniversary }
                     )
-                    Box(
-                        modifier = Modifier.graphicsLayer {
-                            alpha = appear
-                            translationY = (1f - appear) * 28f.dp.toPx()
-                        }
-                    ) {
-                        AnniversaryCard(
-                            item = item,
-                            showAdvanced = advancedMode,
-                            posterEnabled = posterTap,
-                            onPoster = { posterItem = item },
-                            onEdit = { toEdit = item.anniversary },
-                            onDelete = { toDelete = item.anniversary }
-                        )
-                    }
                 }
             }
         }
